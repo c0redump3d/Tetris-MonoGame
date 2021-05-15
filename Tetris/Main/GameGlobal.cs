@@ -28,8 +28,6 @@ namespace Tetris.Main
 
         private void ResetGame()
         {
-            Winner = false;
-            Sender = false;
             Instance.GetPlayer().SetGravity(Instance.GetScoreHandler().Level);
             //wipe all placed rectangles
             Instance.GetPlayer().Reset();
@@ -44,6 +42,8 @@ namespace Tetris.Main
         {
             //hides labels, starts timers and starts to play music
             GameOver = false;
+            Winner = false;
+            Sender = false;
             ResetGame();
             Paused = false;
             Stopped = false;

@@ -13,7 +13,7 @@ namespace Tetris.Multiplayer.Network.Packets
 
         protected override void RunPacket(string data)
         {
-            Instance.GetMultiplayerHandler().MultiPlacedRect = new Rectangle[0];
+            Instance.GetMultiplayerHandler().PlacedRect = new Rectangle[0];
             Instance.GetMultiplayerHandler().StoredImage = new Texture2D[0];
 
             //InstanceManager.GetMainForm().MultiShape = int.Parse(_data.Split(' ')[1]); Not needed anymore since we parse it under this to set the image.
@@ -24,7 +24,7 @@ namespace Tetris.Multiplayer.Network.Packets
             string[] placedPos = data.Remove(0,2).Split(',');
 
             //loop through the given data and translate string data to placedRect positions and colors.
-            List<Rectangle> createBlock = Instance.GetMultiplayerHandler().MultiPlacedRect.ToList();
+            List<Rectangle> createBlock = Instance.GetMultiplayerHandler().PlacedRect.ToList();
             List<Texture2D> addTexture = Instance.GetMultiplayerHandler().StoredImage.ToList();
             for (int i = 0; i < placedPos.Length - 1; i++)
             {
@@ -32,7 +32,7 @@ namespace Tetris.Multiplayer.Network.Packets
                 createBlock.Add(new Rectangle(int.Parse(splitPos[0]), int.Parse(splitPos[1]), 32, 32));
                 addTexture.Add(Utils.TranslateNameToTexture(splitPos[2]));
             }
-            Instance.GetMultiplayerHandler().MultiPlacedRect = createBlock.ToArray();
+            Instance.GetMultiplayerHandler().PlacedRect = createBlock.ToArray();
             Instance.GetMultiplayerHandler().StoredImage = addTexture.ToArray();
 
             base.RunPacket();

@@ -39,7 +39,7 @@ namespace Tetris.Multiplayer.Network
                     while (!_isClientConnected)
                     {
                         Debug.DebugMessage("Waiting for client connection on port 25565...", 3);
-                        Thread.Sleep(10);
+                        Thread.Sleep(100);
                         _connectedClient = _clientListener.AcceptTcpClient(); // attempt to accept incoming connection
                         _stream = _connectedClient.GetStream(); // grab stream of connected client
                         _isClientConnected = true;

@@ -14,6 +14,7 @@ namespace Tetris.Other
         public static Texture2D[] GuiImage = new Texture2D[2];
         public static Texture2D CurrentGuiImage;
         public static Texture2D Stats;
+        public static Texture2D TextBoxGui;
         public static int ScreenWidth = 789;
         public static int ScreenHeight = 694;
         public static bool ResizedWindow = false;
@@ -66,6 +67,7 @@ namespace Tetris.Other
             GuiImage[1] = content.Load<Texture2D>("gui/guimultiplayer");
             CurrentGuiImage = GuiImage[0];
             Stats = content.Load<Texture2D>("gui/stats");
+            TextBoxGui = content.Load<Texture2D>("gui/textbox");
             pinchOverlay = content.Load<Texture2D>("gui/pinchglow");
             hoog_12 = content.Load<SpriteFont>("gui/font/hoog_12");
             hoog_16 = content.Load<SpriteFont>("gui/font/hoog_16");

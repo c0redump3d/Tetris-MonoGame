@@ -28,6 +28,7 @@ namespace Tetris.Other
         private static GameSettings _gameSettings;
         private static Gui _gui;
         private static GuiSettings _guiSettings;
+        private static GuiMultiplayer _guiMultiplayer;
         private static MultiplayerHandler _multiplayerHandler;
         private static Packet _packet;
         public static Texture2D CurrentLevelUpImage = Globals.levelUpTextures[0];
@@ -52,6 +53,7 @@ namespace Tetris.Other
             _gameSettings = new GameSettings();
             _gui = new Gui();
             _guiSettings = new GuiSettings();
+            _guiMultiplayer = new GuiMultiplayer();
             _packet = new Packet();
             _multiplayerHandler = new MultiplayerHandler();
         }
@@ -59,6 +61,11 @@ namespace Tetris.Other
         public static Packet GetPacket()
         {
             return _packet;
+        }
+
+        public static GuiMultiplayer GetGuiMultiplayer()
+        {
+            return _guiMultiplayer;
         }
         
         public static bool IsMultiplayerMode()

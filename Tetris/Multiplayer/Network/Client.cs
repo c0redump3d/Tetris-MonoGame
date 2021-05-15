@@ -53,6 +53,7 @@ namespace Tetris.Multiplayer.Network
                 _connectionEstablished = true;
 
                 Instance.GetPacket().SendPacketFromName("con");
+                Instance.GetGuiMultiplayer().Connected();
 
                 while (_connectionEstablished)
                 {
@@ -139,6 +140,10 @@ namespace Tetris.Multiplayer.Network
                     goto connection;
                 
                 Debug.DebugMessage($"Client was unable to connect to {_ipAddress} after 10 tries.", 4, false);
+                _ipAddress = "127.0.0.1";
+                Instance.GetGuiMultiplayer().FailedConnect = true;
+                Instance.GetGuiMultiplayer().IsConnecting = false;
+                Instance.GetGuiMultiplayer().EnableServerButton();
                 CloseConnection();
             }
         }
@@ -167,7 +172,7 @@ namespace Tetris.Multiplayer.Network
                 }
                 catch (Exception ex)
                 {
-                    Debug.DebugMessage("Unable to send data to client. Error: " + ex.Message, 3, true);
+                    Debug.DebugMessage("Unable to send data to server. Error: " + ex.Message, 3, true);
                 }
             });
         }

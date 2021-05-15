@@ -174,7 +174,7 @@ namespace Tetris.GUI
                     continue;
                 }
 
-                but.Clickable = false;
+                but.Enabled = false;
             }
         }
         
@@ -182,12 +182,12 @@ namespace Tetris.GUI
         {
             foreach (var but in buttons)
             {
-                if (but.Clickable)
+                if (but.Enabled)
                 {
                     continue;
                 }
 
-                but.Clickable = true;
+                but.Enabled = true;
             }
         }
         
@@ -208,8 +208,7 @@ namespace Tetris.GUI
             {
                 foreach (var but in buttons)
                 {
-                    but.Update(new Rectangle(but.Rec.X, but.Rec.Y, (int) but.Font.MeasureString(but.Text).X,
-                        (int) but.Font.MeasureString(but.Text).Y));
+                    but.Update();
                 }
             }
             catch (Exception)

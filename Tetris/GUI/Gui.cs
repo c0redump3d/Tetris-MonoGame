@@ -31,19 +31,23 @@ namespace Tetris.GUI
             Instance.GetGame().GameOver = false;
             if (!Client.IsConnected())
             {
-                buttons.Add(new Button(0, new Rectangle(280, 380, 0, 0), "START GAME", Globals.hoog_24));
-                buttons.Add(new Button(1, new Rectangle(310, 430, 0, 0), "SETTINGS", Globals.hoog_24));
-                buttons.Add(new Button(2, new Rectangle(485, 480, 0, 0), ">", Globals.hoog_24, false));
-                buttons.Add(new Button(3, new Rectangle(290, 480, 0, 0), "<", Globals.hoog_24, false));
+                buttons.Add(new Button(0, new Rectangle(280, 330, 0, 0), "START GAME", Globals.hoog_24));
+                buttons.Add(new Button(1, new Rectangle(272, 380, 0, 0), "MULTIPLAYER", Globals.hoog_24));
+                buttons.Add(new Button(2, new Rectangle(310, 430, 0, 0), "SETTINGS", Globals.hoog_24));
+                buttons.Add(new Button(3, new Rectangle(485, 480, 0, 0), ">", Globals.hoog_24, false));
+                buttons.Add(new Button(4, new Rectangle(290, 480, 0, 0), "<", Globals.hoog_24, false));
                 buttons[0].OnClick += StartButtonClick;
-                buttons[1].OnClick += SettingsButton;
-                buttons[2].OnClick += LevelRight;
-                buttons[3].OnClick += LevelLeft;
+                buttons[1].OnClick += (s) => Instance.GetGuiMultiplayer().ShowMultiplayer();
+                buttons[2].OnClick += SettingsButton;
+                buttons[3].OnClick += LevelRight;
+                buttons[4].OnClick += LevelLeft;
             }
             else
             {
-                buttons.Add(new Button(1, new Rectangle(310, 430, 0, 0), "SETTINGS", Globals.hoog_24));
-                buttons[0].OnClick += SettingsButton;
+                buttons.Add(new Button(1, new Rectangle(272, 380, 0, 0), "MULTIPLAYER", Globals.hoog_24));
+                buttons.Add(new Button(2, new Rectangle(310, 430, 0, 0), "SETTINGS", Globals.hoog_24));
+                buttons[0].OnClick += (s) => Instance.GetGuiMultiplayer().ShowMultiplayer();
+                buttons[1].OnClick += SettingsButton;
             }
         }
 
@@ -107,13 +111,19 @@ namespace Tetris.GUI
             {
                 Instance.GetGuiSettings().Draw(_spriteBatch);
             }
+
+            if (Instance.GetGame().CurrentScreen == 4)
+            {
+                Instance.GetGuiMultiplayer().Draw(_spriteBatch, gameTime);
+            }
             
             _spriteBatch.End();
 
             if (Instance.GetGame().CurrentScreen == 0 && !Client.IsConnected())
             {
                 _spriteBatch.Begin();
-                _spriteBatch.DrawString(Globals.hoog_24, $"Level {Instance.GetScoreHandler().SelectedLevel}", new Vector2(Instance.GetScoreHandler().SelectedLevel == 1 ? 340 : 330,480), Color.White);
+                _spriteBatch.DrawCenteredString(Globals.hoog_24, $"Level {Instance.GetScoreHandler().SelectedLevel}", new Vector2(395,497), Color.White);
+                _spriteBatch.DrawString(Globals.hoog_12, $"Created by Carson Kelley", new Vector2(335,655), Color.White);
                 _spriteBatch.End();
             }
 
@@ -131,13 +141,13 @@ namespace Tetris.GUI
                 _spriteBatch.Begin(transformMatrix: Matrix.CreateTranslation(new Vector3(235, 19, 0)));
                 _spriteBatch.Draw(Globals.Stats, new Vector2(15, 172), Color.White * 0.75f);
                 _spriteBatch.DrawString(Globals.hoog_38, @"Game Over!", new Vector2(4,100), Color.White);
-                _spriteBatch.DrawString(Globals.hoog_18, $@"Game Stats:", new Vector2(80,175), Color.White);
-                _spriteBatch.DrawString(Globals.hoog_18, $@"Score: {Instance.GetScoreHandler().Score}", new Vector2(35,200), Color.White);
-                _spriteBatch.DrawString(Globals.hoog_18, $@"Total Lines: {Instance.GetScoreHandler().TotalLines}", new Vector2(35,230), Color.White);
-                _spriteBatch.DrawString(Globals.hoog_18, $@"T-Spin Singles: {Instance.GetScoreHandler().Bonuses[0]}", new Vector2(35,260), Color.White);
-                _spriteBatch.DrawString(Globals.hoog_18, $@"T-Spin Doubles: {Instance.GetScoreHandler().Bonuses[1]}", new Vector2(35,290), Color.White);
-                _spriteBatch.DrawString(Globals.hoog_18, $@"T-Spin Triples: {Instance.GetScoreHandler().Bonuses[2]}", new Vector2(35,320), Color.White);
-                _spriteBatch.DrawString(Globals.hoog_18, $@"Tetrises: {Instance.GetScoreHandler().Bonuses[3]}", new Vector2(35,350), Color.White);
+                _spriteBatch.DrawString(Globals.hoog_18, $@"Game Stats:", new Vector2(80,175), Color.LightGray);
+                _spriteBatch.DrawString(Globals.hoog_18, $@"Score: {Instance.GetScoreHandler().Score}", new Vector2(35,200), Color.LightGray);
+                _spriteBatch.DrawString(Globals.hoog_18, $@"Total Lines: {Instance.GetScoreHandler().TotalLines}", new Vector2(35,230), Color.LightGray);
+                _spriteBatch.DrawString(Globals.hoog_18, $@"T-Spin Singles: {Instance.GetScoreHandler().Bonuses[0]}", new Vector2(35,260), Color.LightGray);
+                _spriteBatch.DrawString(Globals.hoog_18, $@"T-Spin Doubles: {Instance.GetScoreHandler().Bonuses[1]}", new Vector2(35,290), Color.LightGray);
+                _spriteBatch.DrawString(Globals.hoog_18, $@"T-Spin Triples: {Instance.GetScoreHandler().Bonuses[2]}", new Vector2(35,320), Color.LightGray);
+                _spriteBatch.DrawString(Globals.hoog_18, $@"Tetrises: {Instance.GetScoreHandler().Bonuses[3]}", new Vector2(35,350), Color.LightGray);
                 _spriteBatch.End();
             }
         }
@@ -151,10 +161,14 @@ namespace Tetris.GUI
                     Instance.GetGuiSettings().Update();
                 }
                 
+                if (Instance.GetGame().CurrentScreen == 4)
+                {
+                    Instance.GetGuiMultiplayer().Update();
+                }
+                
                 foreach (var but in buttons)
                 {
-                    but.Update(new Rectangle(but.Rec.X, but.Rec.Y, (int) but.Font.MeasureString(but.Text).X,
-                        (int) but.Font.MeasureString(but.Text).Y));
+                    but.Update();
                 }
             }
             catch (Exception)

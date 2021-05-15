@@ -11,7 +11,6 @@ namespace Tetris.Main
 {
     public class TetrisGame : Game
     {
-        //TODO: IMPORTANT: Fix memory leak
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private SpriteBatch _spriteBatchGame;
@@ -29,7 +28,6 @@ namespace Tetris.Main
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
             Globals.SetUp(Content);
             _graphics.PreferredBackBufferWidth = Globals.ScreenWidth;//789
             _graphics.PreferredBackBufferHeight = Globals.ScreenHeight;//694
@@ -95,7 +93,7 @@ namespace Tetris.Main
 
             if (Instance.InMultiplayer)
             {
-                Instance.GetMultiplayerHandler().UpdateText();
+                Instance.GetMultiplayerHandler().Update(gameTime);
             }
 
             Instance.GetGui().Update();
@@ -119,8 +117,6 @@ namespace Tetris.Main
             }
 
             Instance.GetGui().DrawGui(_spriteBatch, gameTime);
-            
-            // TODO: Add your drawing code here
 
             Vector2 offset = new Vector2(0,0);
             if (Instance.GetGame().ScreenShake)

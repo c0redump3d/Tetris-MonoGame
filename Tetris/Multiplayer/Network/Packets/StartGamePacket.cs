@@ -14,7 +14,7 @@ namespace Tetris.Multiplayer.Network.Packets
                 return;
             Instance.GetGame().StartCountdown();
             Instance.GetPlayer().PlyY = 0;
-            Instance.GetMultiplayerHandler().MultiPlacedRect = new Rectangle[0];
+            Instance.GetMultiplayerHandler().PlacedRect = new Rectangle[0];
             base.RunPacket();
         }
 

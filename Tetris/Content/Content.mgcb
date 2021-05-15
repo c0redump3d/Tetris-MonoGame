@@ -463,6 +463,18 @@
 /processorParam:TextureFormat=Color
 /build:gui/tetrislogo.png
 
+#begin gui/textbox.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:gui/textbox.png
+
 #begin gui/tripleline.png
 /importer:TextureImporter
 /processor:TextureProcessor

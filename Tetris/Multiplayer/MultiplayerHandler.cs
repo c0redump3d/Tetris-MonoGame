@@ -14,7 +14,7 @@ namespace Tetris.Multiplayer
         private Rectangle mTwo;
         private Rectangle mThree;
         private Rectangle mFour;
-        public Rectangle[] MultiPlacedRect;
+        public Rectangle[] PlacedRect;
         public Texture2D[] StoredImage;
         public Texture2D MultiTetImage = Globals.BlockTexture[7];
         public int MultiX = 0;
@@ -31,7 +31,7 @@ namespace Tetris.Multiplayer
         public void ShowMultiplayer()
         {
             font = Globals.hoog_12;
-            MultiPlacedRect = new Rectangle[0];
+            PlacedRect = new Rectangle[0];
             StoredImage = new Texture2D[0];
             Globals.CurrentGuiImage = Globals.GuiImage[1];
             Globals.ScreenWidth = 1172;
@@ -41,7 +41,7 @@ namespace Tetris.Multiplayer
 
         public void HideMultiplayer()
         {
-            MultiPlacedRect = new Rectangle[0];
+            PlacedRect = new Rectangle[0];
             StoredImage = new Texture2D[0];
             Globals.CurrentGuiImage = Globals.GuiImage[0];
             Globals.ScreenWidth = 789;
@@ -49,8 +49,35 @@ namespace Tetris.Multiplayer
             Globals.ResizedWindow = true;
         }
 
-        public void UpdateText()
+        /// <summary>
+        /// This function is used to check if any placed tetris blocks reaches the top of the screen.
+        /// If it does, it will end the game.
+        /// </summary>
+        private void HitTop()
         {
+            if (Instance.GetGame().ScreenShake)
+                return;
+            for (int i = PlacedRect.Length - 1; i > 1; i--)
+            {
+                for (int f = 0; f < 4; f++)
+                {
+                    if (PlacedRect[i].Y == Globals.TopOut) // if placed rectangle reaches top of board, end game.
+                    {
+                        mOne = new();
+                        mTwo = new();
+                        mThree = new();
+                        mFour = new();
+                        Instance.GetPlayer().PlacedRect.Add(new Rectangle(999, Globals.TopOut,32,32), Globals.BlockTexture[7]);
+                        return;
+                    }
+                }
+            }
+        }
+        
+        public void Update(GameTime gameTime)
+        {
+            HitTop();
+            
             if (!Instance.IsPlayerConnected() && Instance.GetGame().Stopped)
             {
                 if (Server.ServerRunning())
@@ -72,8 +99,8 @@ namespace Tetris.Multiplayer
         {
             try
             {
-                for (int i = MultiPlacedRect.Length - 1; i > 0; i--)
-                    spriteBatch.Draw(StoredImage[i], MultiPlacedRect[i], Color.White);
+                for (int i = PlacedRect.Length - 1; i > 0; i--)
+                    spriteBatch.Draw(StoredImage[i], PlacedRect[i], Color.White);
 
                 if (Instance.GetGame().Stopped)
                 {
