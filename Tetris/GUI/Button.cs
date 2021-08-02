@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Tetris.GameDebug;
 
 namespace Tetris.GUI
 {
@@ -57,6 +58,7 @@ namespace Tetris.GUI
                     oldState.LeftButton == ButtonState.Released)
                 {
                     // Someone's listening, and we have a click
+                    Debug.DebugMessage($"Button \"{this.Text}\"(id:{this.Id},x:{this.Rec.X},y:{this.Rec.Y}) has been clicked.", 1);
                     this.OnClick.Invoke(this);
                 }
             }

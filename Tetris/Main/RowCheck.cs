@@ -45,7 +45,6 @@ namespace Tetris.Main
         /// When this is called, it will store all current placedRect indexes into an array here, where we then check to see if there any full rows.
         /// </summary>
         /// <param name="placedRect"></param>
-        /// <param name="remove"></param>
         public void UpdateRowCheck(ref Rectangle[] placedRect)
         {
             if (removing)
@@ -72,8 +71,6 @@ namespace Tetris.Main
         /// Will check to see if any rows need to be removed, and if so deletes them from the placedRect array.
         /// </summary>
         /// <param name="placedRect"></param>
-        /// <param name="storedColor"></param>
-        /// <param name="remove"></param>
         private void CheckRow(ref Rectangle[] placedRect)
         {
             moveDown = CheckIfFull(ref placedRect);

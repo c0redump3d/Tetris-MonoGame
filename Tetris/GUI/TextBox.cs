@@ -37,7 +37,6 @@ namespace Tetris.GUI
                 {
                     if (Text == "192.168.1.1")
                         Text = "";
-                    // Someone's listening, and we have a click
                     Focused = true;
                 }
             }
