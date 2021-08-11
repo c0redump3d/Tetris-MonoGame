@@ -12,7 +12,10 @@ namespace Tetris.Multiplayer.Network.Packets
         {
             if (IsServer())
                 return;
+
+            Instance.GetSound().PlayBackground();
             Instance.GetGame().StartCountdown();
+            Instance.GetGame().CurrentMode = 0;
             Instance.GetPlayer().PlyY = 0;
             Instance.GetMultiplayerHandler().PlacedRect = new Rectangle[0];
             base.RunPacket();
