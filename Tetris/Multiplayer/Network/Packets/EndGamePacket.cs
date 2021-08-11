@@ -9,6 +9,7 @@ namespace Tetris.Multiplayer.Network.Packets
 
         public EndGamePacket(string name) : base(name) {}
 
+        //TODO: This is not working for some reason when server attempts to send to client(at least from mac to win)
         protected override void RunPacket()
         {
             if (Instance.GetGame().Sender)

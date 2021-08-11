@@ -11,37 +11,6 @@ namespace Tetris.Main
 {
     public class TetrisGame : Game
     {
-<<<<<<< Updated upstream
-=======
-        /*
-         * 
-         *  Version 1.1 Changes
-         *  -Random Row is now much more forgiving(Tetris' don't punish you, and clearing gray lines don't as well)
-         *  -Added game modes (Survival, Time Trial, 40 Line, and Hardcore)
-         *  -Random Row has been removed from all game modes except hardcore(will now punish on all levels instead of > 6)
-         *  -Game Over screen now shows the total elapsed time of the latest game.
-         *  -Gravity has been changed to reflect Tetris Guideline requirements(Higher levels are now much harder!)
-         *  -Discord rich presence added, will tell level, score, and lines
-         *  -Levels 11-20 are now selectable on the main menu
-         *  -Created by text is now clickable and will take you to the github page
-         *  -Added a version identifier in the bottom left
-         *  -Updated icon to reflect current blocks
-         *  -Animated images are now automatically centered to the board
-         *  -Completely revamped debug menu
-         *  -Fairly large UI updates
-         *      -Copyright notice on startup
-         *      -Buttons now have a bordered rectangle around them
-         *      -Buttons will now highlight in gray when hovered instead of the carrot identifier
-         *      -Menus now fade in when opened
-         *      -Random tetris pieces fall from screen when on main menu
-         *      -Background music
-         *      -Updated pause menu(pauses music, countdown when unpaused)
-         *  -Fixed player being able to move/hold during screenshake animation
-         *  -Fixed O block and I block spawn (could prevent game from ending as it could clip through placed blocks)
-         *  -Fixed an issue with random row, if the player gets a tetris but any rows were gray, they will be punished(ex: 2 normal rows and one gray row will punish the player with 1 row)
-         * 
-         */
->>>>>>> Stashed changes
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private SpriteBatch _spriteBatchGame;
@@ -127,7 +96,7 @@ namespace Tetris.Main
                 Instance.GetMultiplayerHandler().Update(gameTime);
             }
 
-            Instance.GetGui().Update(gameTime);
+            Instance.GetGui().Update();
 
             base.Update(gameTime);
         }
@@ -174,7 +143,7 @@ namespace Tetris.Main
                 else
                     _spriteBatchGame.Begin();
                 Instance.GetPredict().Draw(_spriteBatchGame);
-                Instance.GetPlayer().DrawPlayer(_spriteBatchGame);
+                Instance.GetPlayer().DrawPlayer(_spriteBatchGame, gameTime);
                 _spriteBatchGame.End();
                 _spriteBatchGame.GraphicsDevice.Viewport = defaultViewport;
                 Instance.GetNextShape().RenderNextShapes(_spriteBatch);

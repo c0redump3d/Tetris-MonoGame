@@ -74,9 +74,6 @@ namespace Tetris.Main.Player
         
         private void LevelUp()
         {
-            if (Instance.GetGame().CurrentMode is 1 or 2)
-                return;
-            
             Level++;
             string addZero = Level < 10 ? "0" : "";
             Instance.GetGui().LevelText = $@"{addZero}{Level}";

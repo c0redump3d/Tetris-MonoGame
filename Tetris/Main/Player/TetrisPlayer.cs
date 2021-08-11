@@ -50,17 +50,14 @@ namespace Tetris.Main.Player
         private bool forceDrop = false;
         private RowCheck checkRow;
         private readonly Random rand;
-        private int TimerWait = 1000;
-        private int SecondsRemaining = 59;
-        private int MinutesRemaining = 2;
-        public int[] TimeElapsed = new int[2];
-        
+        private readonly Prediction predict;
 
         public TetrisPlayer()
         {
             PlacedRect = new Rectangle[0];
             StoredImage = new Texture2D[0];
             checkRow = Instance.GetRowCheck();
+            predict = Instance.GetPredict();
             rand = Instance.GetRandom();
         }
 
@@ -68,18 +65,6 @@ namespace Tetris.Main.Player
         {
             PlacedRect.Add(new Rectangle(0,9999,0,0),Globals.BlockTexture[7]);
             PlacedRect.Add(new Rectangle(0,9999,0,0),Globals.BlockTexture[7]);
-<<<<<<< Updated upstream
-=======
-            if (Instance.GetScoreHandler().SelectedLevel > 10)
-                gravityInterval = 325 - (5 * (Instance.GetScoreHandler().Level - 10));
-            TimerWait = 1000;
-            TimeElapsed = new int[2];
-            if (Instance.GetGame().CurrentMode == 1)
-            {
-                SecondsRemaining = 59;
-                MinutesRemaining = 2;
-            }
->>>>>>> Stashed changes
         }
 
         /// <summary>
@@ -96,7 +81,6 @@ namespace Tetris.Main.Player
                 {
                     if (PlacedRect[i].Y == Globals.TopOut) // if placed rectangle reaches top of board, end game.
                     {
-<<<<<<< Updated upstream
                         Debug.DebugMessage($"Rectangle {i} reached top of screen.", 1);
                         for (int l = 0; l < 4; l++)
                             Player[l] = new();
@@ -106,26 +90,10 @@ namespace Tetris.Main.Player
                         Instance.GetGame().ShakeStart = gameTime.ElapsedGameTime.Milliseconds;
                         Instance.GetGame().ScreenShake = true;
                         Instance.GetPacket().SendPacketFromName("end");
-=======
-                        Instance.GetGuiDebug().DebugMessage($"Rectangle {i} reached top of screen.");
-                        EndGame(gameTime);
->>>>>>> Stashed changes
                         return;
                     }
                 }
             }
-        }
-
-        private void EndGame(GameTime gameTime)
-        {
-            for (int l = 0; l < 4; l++)
-                Player[l] = new();
-            showPinch = false;
-            Instance.GetSound().StopPinch();
-            Instance.GetSound().StopMusic();
-            Instance.GetGame().ShakeStart = gameTime.ElapsedGameTime.Milliseconds;
-            Instance.GetGame().ScreenShake = true;
-            Instance.GetPacket().SendPacketFromName("end");
         }
         
         private void UpdatePlacedAnim(GameTime gameTime)
@@ -231,12 +199,7 @@ namespace Tetris.Main.Player
                         }
                     }
 
-<<<<<<< Updated upstream
                     if (GetLinesCleared() > 1 && Instance.GetScoreHandler().Level > 6)
-=======
-                    //for hardcore mode
-                    if (Instance.GetGame().CurrentMode == 3 && checkRow.GetActualLinesCleared() is > 1 and < 4 && !tSpin)
->>>>>>> Stashed changes
                     {
                         RandomBlock(1);
                     }
@@ -254,23 +217,16 @@ namespace Tetris.Main.Player
                     Instance.GetHoldShape().AllowSwap();
 
                     Instance.GetPacket().SendPacketFromName("plc");
-<<<<<<< Updated upstream
                 }
                 else { Grounded = false; }
             }// Don't worry to much if exception is raised, OutOfBoundsException can be raised if PlacedRect is modified while looping through its content
             catch (Exception) { }
-=======
-                    checkRow.GreyRemoved = 0;
-
-                }
-                else { Grounded = false; }
-            }// Don't worry to much if exception is raised, OutOfBoundsException can be raised if PlacedRect is modified while looping through its content
-            catch (Exception) {}
->>>>>>> Stashed changes
         }
 
         public bool InstantFall()
         {
+            if (PlyY < -48)
+                return false;
             forceDrop = true;
             for (int i = 0; i < 25; i++)
             {
@@ -305,7 +261,7 @@ namespace Tetris.Main.Player
         }
         
         /// <summary>
-        /// Calculates the gravity for the given level (equation from: https://tetris.fandom.com/wiki/Tetris_Worlds#Gravity)
+        /// Sets predefined gravity intervals for game, if # > 9, we subtract 5 each level
         /// </summary>
         /// <param name="level">Current level</param>
         public void SetGravity(int level)
@@ -380,41 +336,6 @@ namespace Tetris.Main.Player
 
         public void Update(GameTime gameTime)
         {
-            //Used for keeping track of the elapsed time of the current game
-            TimerWait -= gameTime.ElapsedGameTime.Milliseconds;
-
-            if (TimerWait <= 0 && Instance.GetGame().CanMove)
-            {
-                TimerWait = 1000;
-                if (Instance.GetGame().CurrentMode == 1)
-                {
-                    if (SecondsRemaining != 0)
-                    {
-                        SecondsRemaining--;
-                    }
-                    else
-                    {
-                        if (MinutesRemaining != 0)
-                        {
-                            SecondsRemaining = 59;
-                            MinutesRemaining--;
-                        }
-                    }
-                }
-                else
-                {
-                    if (TimeElapsed[1] != 59)
-                    {
-                        TimeElapsed[1]++;
-                    }
-                    else
-                    {
-                        TimeElapsed[1] = 0;
-                        TimeElapsed[0]++;
-                    }
-                }
-            }
-
             bool found = false;
             for (int i = 0; i < PlacedRect.Length; i++)
             {
@@ -422,8 +343,7 @@ namespace Tetris.Main.Player
                     found = true;
             }
 
-            if ((found || MinutesRemaining == 0 && SecondsRemaining <= 30 && Instance.GetGame().CurrentMode == 1) &&
-                Instance.GetGame().CanMove && !Instance.GetGame().Paused)
+            if (found && !PlacedAnimation)
             {
                 showPinch = true;
                 Instance.GetSound().PlayPinch();
@@ -434,26 +354,12 @@ namespace Tetris.Main.Player
                 Instance.GetSound().StopPinch();
             }
 
-            if (Instance.GetGame().CurrentMode == 2 && Instance.GetScoreHandler().TotalLines >= 40 &&
-                Instance.GetGame().CanMove || Instance.GetGame().CurrentMode == 1 && MinutesRemaining == 0 &&
-                SecondsRemaining == 0 && Instance.GetGame().CanMove)
-            {
-                Instance.GetGame().Winner = true;
-                PlacedRect.Add(new Rectangle(-32, Globals.TopOut, 32, 32), Globals.BlockPlacedTexture[7]);
-                EndGame(gameTime);
-            }
-
             BlockCollision(gameTime);
             HitTop(gameTime);
             UpdatePlacedAnim(gameTime);
         }
-<<<<<<< Updated upstream
         
         public void DrawPlayer(SpriteBatch _spriteBatch, GameTime gameTime)
-=======
-
-        public void DrawPlayer(SpriteBatch _spriteBatch)
->>>>>>> Stashed changes
         {
             UpdateRectangles();
             //draw player rectangles
@@ -512,15 +418,6 @@ namespace Tetris.Main.Player
                 for (int i = 0; i < 4; i++)
                     _spriteBatch.Draw(currentTetImage,
                         Instance.GetRotateCheck().GetRotationBlocks()[i], Color.White * 0.2F);
-            }
-
-            if (Instance.GetGame().CurrentMode == 1)
-            {
-                string secondsText = SecondsRemaining < 10 ? $"0{SecondsRemaining}" : $"{SecondsRemaining}";
-            
-                _spriteBatch.DrawString(Globals.hoog_12,
-                    $"Time Remaining: {MinutesRemaining}:{secondsText}",
-                    new Vector2(0, 0), Color.White);
             }
         }
 
