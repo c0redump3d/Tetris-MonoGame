@@ -3,7 +3,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Tetris.GameDebug;
 using Tetris.Other;
 
 namespace Tetris.Multiplayer.Network
@@ -22,7 +21,7 @@ namespace Tetris.Multiplayer.Network
             _serverThread = new Thread(RunServer);
             _serverThread.Start(); // begin running server thread
             _isRunningServer = true;
-            Debug.DebugMessage("Server thread starting...", 3);
+            Instance.GetGuiDebug().DebugMessage("Server thread starting...");
         }
 
         private void RunServer()
@@ -38,7 +37,6 @@ namespace Tetris.Multiplayer.Network
                     //handle incoming connections
                     while (!_isClientConnected)
                     {
-                        Debug.DebugMessage("Waiting for client connection on port 25565...", 3);
                         Thread.Sleep(100);
                         _connectedClient = _clientListener.AcceptTcpClient(); // attempt to accept incoming connection
                         _stream = _connectedClient.GetStream(); // grab stream of connected client
@@ -119,8 +117,7 @@ namespace Tetris.Multiplayer.Network
 
                             if (ex is ThreadAbortException)
                                 break;
-                            Debug.DebugMessage("Client connection interrupted, exception thrown: " + ex.Message, 3,
-                                true);
+                            Instance.GetGuiDebug().DebugMessage("Client connection interrupted, exception thrown: " + ex.Message);
                             continue;
                         }
                     }
@@ -161,7 +158,7 @@ namespace Tetris.Multiplayer.Network
             }
 
             Instance.InMultiplayer = false;
-            Debug.DebugMessage("Stopping server...", 3, true);
+            Instance.GetGuiDebug().DebugMessage("Stopping server...");
             //stop server thread from running
             _serverThread = null;
         }
@@ -180,9 +177,9 @@ namespace Tetris.Multiplayer.Network
                     _stream.Write(sendData, 0, sendData.Length); // write data to stream
                     _stream.Flush(); // let them know we finished sending our data
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Debug.DebugMessage($"Unable to send data to client. Error: {ex.Message}", 3, true);
+                    //Debug.DebugMessage($"Unable to send data to client. Error: {ex.Message}", 3, true);
                 }
             });
         }

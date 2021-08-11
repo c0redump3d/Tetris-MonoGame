@@ -3,7 +3,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Tetris.GameDebug;
 using Tetris.Other;
 
 namespace Tetris.Multiplayer.Network
@@ -26,7 +25,7 @@ namespace Tetris.Multiplayer.Network
             _clientThread = new Thread(RunClient);
             _clientThread.Start(); // start running the client thread
 
-            Debug.DebugMessage($"Client attempting to connect to: {ipAddress}", 4);
+            Instance.GetGuiDebug().DebugMessage($"Client attempting to connect to: {ipAddress}");
         }
 
         private void RunClient()
@@ -121,7 +120,7 @@ namespace Tetris.Multiplayer.Network
                         }
 
                         if (!(ex is ThreadAbortException))
-                            Debug.DebugMessage($"Client received information from server but did not understand it! Error: {ex.Message}", 4, true);
+                            Instance.GetGuiDebug().DebugMessage($"Client received information from server but did not understand it! Error: {ex.Message}");
                         continue;
                     }
                 }
@@ -134,12 +133,12 @@ namespace Tetris.Multiplayer.Network
                     return;
                 }
                 
-                Debug.DebugMessage($"Pinging {_ipAddress} ({tries})...", 4, false);
+                Instance.GetGuiDebug().DebugMessage($"Pinging {_ipAddress} ({tries})...");
                 
                 if(tries < 10)
                     goto connection;
                 
-                Debug.DebugMessage($"Client was unable to connect to {_ipAddress} after 10 tries.", 4, false);
+                Instance.GetGuiDebug().DebugMessage($"Client was unable to connect to {_ipAddress} after 10 tries.");
                 _ipAddress = "127.0.0.1";
                 Instance.GetGuiMultiplayer().FailedConnect = true;
                 Instance.GetGuiMultiplayer().IsConnecting = false;
@@ -170,9 +169,9 @@ namespace Tetris.Multiplayer.Network
                     _stream.Write(sendData, 0, sendData.Length);
                     _stream.Flush();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Debug.DebugMessage("Unable to send data to server. Error: " + ex.Message, 3, true);
+                    //Debug.DebugMessage("Unable to send data to server. Error: " + ex.Message, 3, true);
                 }
             });
         }
@@ -196,7 +195,7 @@ namespace Tetris.Multiplayer.Network
             }
             
             Instance.InMultiplayer = false;
-            Debug.DebugMessage("Closing connection...", 4, true);
+            Instance.GetGuiDebug().DebugMessage("Closing connection...");
             _clientThread = null;
         }
 

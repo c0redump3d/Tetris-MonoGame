@@ -1,9 +1,5 @@
-﻿using System.Buffers;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using Tetris.GameDebug;
-using Tetris.Main.Player;
-using Tetris.Multiplayer.Network;
 using Tetris.Other;
 using Tetris.Settings;
 
@@ -33,20 +29,33 @@ namespace Tetris.Main
                 }
             }
 
-            if (!Instance.GetGame().Stopped && Instance.GetGame().CurrentScreen == 1)
+            if (!Instance.GetGame().Stopped && Instance.GetGame().CurrentScreen == 1 && Instance.GetGame().CanMove)
             {
                 if (IsKeyPress(Keys.Escape))
                 {
-                    Instance.GetGame().Paused = !Instance.GetGame().Paused;
+                    if (!Instance.GetGame().Paused)
+                    {
+                        Instance.GetGame().Paused = !Instance.GetGame().Paused;
+                        Instance.GetSound().PlayPauseMusic(Instance.GetScoreHandler().Level);
+                        Instance.GetSound().PlaySoundEffect("pause");
+                    }
+                    else
+                    {
+                        if(!Instance.GetGame().GetCountdown())
+                            Instance.GetGame().StartCountdown();
+                    }
+
+                    Instance.GetRichPresence().UpdatePresence();
+                    
                 }
             }
 
-            if (IsKeyPress(Keys.F4) && !Debug.IsEnabled())
+            if (IsKeyPress(Keys.F4))
             {
-                Debug.SetUp();
+                Instance.GetGuiDebug().ShowMenu();
             }
 
-            if (Instance.GetGame().Stopped || Instance.GetGame().Paused)
+            if (Instance.GetGame().Stopped || Instance.GetGame().Paused || !Instance.GetGame().CanMove)
             {
                 oldKeyState = keyState;
                 return;
@@ -117,7 +126,7 @@ namespace Tetris.Main
                 elapsedTime[2] = 0;
             }
 
-            if (IsKeyPress(Keys.F1) && Debug.IsEnabled() && Debug.GetSelection() == 1)
+            if (IsKeyPress(Keys.F1) && Instance.GetGuiDebug().IsOptionEnabled(2))
             {
                 int shape = Instance.GetRotate().GetCurShape();
                 if (shape < 8)

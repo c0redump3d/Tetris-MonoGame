@@ -2,7 +2,8 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Tetris.GameDebug;
+using Tetris.Other;
+using static Microsoft.Xna.Framework.Input.ButtonState;
 
 namespace Tetris.GUI
 {
@@ -10,60 +11,95 @@ namespace Tetris.GUI
     {
         public event Action<object> OnClick;
         private MouseState oldState;
-        private int waitTime = 10;
+        private int waitTime;
 
         public Rectangle Rec { get; set; }
         public string Text { get; set; }
         public SpriteFont Font { get; set; }
         public bool Hovering { get; private set; }
-        private bool Indicator { get; set; }
         public bool Enabled { get; set; } = true;
+        public int Size { get; set; } = 1;
         public int Id { get; set; }
+        private float FadeOpacity { get; set; } = 0;
+        public bool ShowBox { get; set; } = true;
 
-        public Button(int id, Rectangle rec, string text, SpriteFont font, bool showIndicator = true)
+        public Button(int id, Rectangle rec, string text, SpriteFont font, bool showBox = true)
         {
             this.Id = id;
             this.Rec = rec;
             this.Text = text;
             this.Font = font;
-            this.Indicator = showIndicator;
-            waitTime = 10;
+            this.ShowBox = showBox;
+            waitTime = 1000;
         }
         
         public void Draw(SpriteBatch _spriteBatch, Color col)
         {
-            string tempText = $">{Text}";
-            _spriteBatch.DrawString(Font, Hovering && Indicator ? tempText : Text, new Vector2(Rec.X, Rec.Y), Enabled ? col : Color.Gray);
+            
+            if (FadeOpacity < 1)
+            {
+                FadeOpacity += 0.04f;
+            }
+
+            float mult = FadeOpacity > 0.5f ? 0.5f : FadeOpacity - 0.5f;
+
+            Color col1 = new Color(30, 28, 28);
+            Color col2 = new Color(43, 149, 223);
+            
+            if(FadeOpacity >= 0.4f && ShowBox)
+                _spriteBatch.DrawBorderedRect(new Rectangle((Rec.X - 4) - Size, Rec.Y - Size, (Rec.Width + 6) + Size * 2, Rec.Height + Size * 2), col1 * mult, col2 * FadeOpacity);
+            
+            _spriteBatch.DrawStringWithShadow(Font, Text, new Vector2(Rec.X, Rec.Y), Enabled ? Hovering ? Color.SlateGray * FadeOpacity : col * FadeOpacity : Color.Gray);
+            
+            if (Instance.GetGuiDebug().IsOptionEnabled(4))
+            {
+                var mouseState = Mouse.GetState();
+                if (Rec.Contains(mouseState.Position))
+                {
+                    string text =
+                        $"Button ID:{this.Id} X:{Rec.X} Y:{Rec.Y}\nEnabled:{Enabled} WxH:{Rec.Width}x{Rec.Height}";
+                    Rectangle debugRect =
+                        new(mouseState.X - 32, mouseState.Y - 32, (int) Globals.ConsoleFont.MeasureString(text)
+                            .X + 4, (int) Globals.ConsoleFont.MeasureString(text).Y);
+                    _spriteBatch.Draw(Instance.DebugBox, debugRect, Color.Black * 0.5f);
+                    _spriteBatch.DrawString(Globals.ConsoleFont, $"{text}",
+                        new Vector2(mouseState.X - 30, mouseState.Y - 30), Color.White);
+                }
+            }
         }
         
         public void Update() { // called every tick
-            if (!Enabled)
-            {
-                Hovering = false;
-                return;
-            }
-
-            if (waitTime != 0)
-            {
-                waitTime--;
-                return;
-            }
+            
             var mouseState = Mouse.GetState();
             Rec = new Rectangle(this.Rec.X, this.Rec.Y, (int) this.Font.MeasureString(this.Text).X,
                 (int) this.Font.MeasureString(this.Text).Y);
-            if (Rec.Contains(new Point(mouseState.X, mouseState.Y)))
+            if (Rec.Contains(new Point(mouseState.X, mouseState.Y)) && Enabled)
             {
+                if(!Hovering)
+                    Instance.GetSound().PlaySoundEffect("cursorhover");
+                
                 Hovering = true;
-                if (this.OnClick != null && mouseState.LeftButton == ButtonState.Pressed &&
-                    oldState.LeftButton == ButtonState.Released)
+
+                if (Size != 3)
+                {
+                    Size += 1;
+                }
+                
+                if (this.OnClick != null && mouseState.LeftButton == Released &&
+                    oldState.LeftButton == Pressed)
                 {
                     // Someone's listening, and we have a click
-                    Debug.DebugMessage($"Button \"{this.Text}\"(id:{this.Id},x:{this.Rec.X},y:{this.Rec.Y}) has been clicked.", 1);
+                    Instance.GetSound().PlaySoundEffect("click");
                     this.OnClick.Invoke(this);
                 }
             }
             else
             {
+                if (Size != 0)
+                {
+                    Size -= 1;
+                }
+                
                 Hovering = false;
             }
 

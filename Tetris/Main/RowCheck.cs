@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Tetris.GameDebug;
 using Tetris.Other;
 
 namespace Tetris.Main
@@ -18,6 +16,7 @@ namespace Tetris.Main
 
         private int[] bank = new int[0];
         private int rowRemove = Globals.MaxY;
+        public int GreyRemoved = 0;
         private bool removing = false;
         private readonly Rectangle[] row = new Rectangle[220];
         private int moveDown = 0;
@@ -64,7 +63,7 @@ namespace Tetris.Main
 
                 CheckRow(ref placedRect); // check to see if any removals are needed
             }
-            catch (Exception ex) { Debug.DebugMessage($"ERROR: Updating row check failed with {ex.Message}", 1, true); }
+            catch (Exception ex) { Instance.GetGuiDebug().DebugMessage($"ERROR: Updating row check failed with {ex.Message}"); }
         }
 
         /// <summary>
@@ -82,6 +81,8 @@ namespace Tetris.Main
                     placedRect.RemoveAt(bank[i]);
                 }
 
+                if(GetActualLinesCleared() != GetLinesCleared())
+                    Instance.GetGuiDebug().DebugMessage($"ActualLinesCleared = {GetActualLinesCleared()}");
                 Reset();
                 Instance.GetScoreHandler().Remove = true; // let mainform know we are removing rows.
 
@@ -122,11 +123,19 @@ namespace Tetris.Main
                 {
                     removing = true; // let CheckRow() know there are rows to be removed.
                     List<int> addBank = bank.ToList();
+                    bool added = false;
                     for (int i = 0; i < board.GetLength(1); i++)
                     {
                         addBank.Add(board[curRow, i]); // add blocks that need to be removed
                         rowRemove = placedRect[board[curRow, i]].Y; // gives us the lowest Y of the row removed.
+                        if (Instance.GetPlayer().StoredImage[board[curRow, i]] == Globals.BlockPlacedTexture[7] &&
+                            !added)
+                        {
+                            GreyRemoved++;
+                            added = true;
+                        }
                     }
+
                     bank = addBank.ToArray();
                     Array.Sort(bank); // sort by positions.
 
@@ -177,5 +186,11 @@ namespace Tetris.Main
         {
             return moveDown;
         }
+
+        internal int GetActualLinesCleared()
+        {
+            return moveDown - GreyRemoved;
+        }
+        
     }
 }

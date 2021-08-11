@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Tetris.GameDebug;
 using Tetris.Multiplayer.Network;
 using Tetris.Other;
 
@@ -104,7 +103,7 @@ namespace Tetris.Multiplayer
 
                 if (Instance.GetGame().Stopped)
                 {
-                    spriteBatch.DrawString(font, playerText, new Vector2(30, spriteBatch.GraphicsDevice.Viewport.Height / 2), Color.White);
+                    spriteBatch.DrawStringWithShadow(font, playerText, new Vector2(30, spriteBatch.GraphicsDevice.Viewport.Height / 2), Color.White);
                     return;
                 }
 
@@ -120,7 +119,7 @@ namespace Tetris.Multiplayer
             }
             catch (Exception ex)
             {
-                Debug.DebugMessage("SecondPlayerForm Error! Exception: " + ex.Message, 1, true);
+                Instance.GetGuiDebug().DebugMessage("Multiplayer Handler Error: " + ex.Message);
             }
         }
     }

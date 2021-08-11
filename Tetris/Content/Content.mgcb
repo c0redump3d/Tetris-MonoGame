@@ -253,6 +253,13 @@
 /processorParam:TextureFormat=Color
 /build:gui/doubleline.png
 
+#begin gui/font/consolas_10.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:gui/font/consolas_10.spritefont
+
 #begin gui/font/hoog_12.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
@@ -306,6 +313,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:gui/GitHub-Mark-64px.png
+
+#begin gui/grid.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:gui/grid.png
 
 #begin gui/gui.png
 /importer:TextureImporter
@@ -523,6 +542,12 @@
 /processorParam:TextureFormat=Color
 /build:gui/tspintriple.png
 
+#begin music/mainmenu.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:music/mainmenu.wav
+
 #begin music/musiclvl5.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -547,6 +572,12 @@
 /processorParam:Quality=Best
 /build:sfx/clear.wav
 
+#begin sfx/click.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sfx/click.wav
+
 #begin sfx/count.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -558,6 +589,12 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:sfx/crush.wav
+
+#begin sfx/cursorhover.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sfx/cursorhover.wav
 
 #begin sfx/fall.wav
 /importer:WavImporter
@@ -624,6 +661,12 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:sfx/move.wav
+
+#begin sfx/pause.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sfx/pause.wav
 
 #begin sfx/pinch.wav
 /importer:WavImporter

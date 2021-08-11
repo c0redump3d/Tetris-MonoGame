@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework.Input;
+using Tetris.Other;
 
 namespace Tetris.Settings
 {
@@ -76,6 +77,7 @@ namespace Tetris.Settings
                     sw.WriteLine(audio.Key + ":" + audio.Value);
                 }
             }
+            Instance.GetGuiDebug().DebugMessage("Successfully saved settings file.");
         }
 
         private void LoadSettings()

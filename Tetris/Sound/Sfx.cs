@@ -14,6 +14,7 @@ namespace Tetris.Sound
         private SoundEffectInstance mainTheme;
         private SoundEffectInstance fastTheme;
         private SoundEffectInstance rushTheme;
+        private SoundEffectInstance backgroundTheme;
         private SoundEffectInstance pinch;
         private List<SoundEffect> soundEffects = new();
         
@@ -22,6 +23,7 @@ namespace Tetris.Sound
             mainTheme = content.Load<SoundEffect>("music/musicmain").CreateInstance();
             fastTheme = content.Load<SoundEffect>("music/musiclvl5").CreateInstance();
             rushTheme = content.Load<SoundEffect>("music/musiclvl8").CreateInstance();
+            backgroundTheme = content.Load<SoundEffect>("music/mainmenu").CreateInstance();
             pinch = content.Load<SoundEffect>("sfx/pinch").CreateInstance();
             pinch.IsLooped = true;
             soundEffects.Add(content.Load<SoundEffect>("sfx/clear"));
@@ -47,11 +49,28 @@ namespace Tetris.Sound
             soundEffects.Add(content.Load<SoundEffect>("sfx/tspin1"));
             soundEffects.Add(content.Load<SoundEffect>("sfx/tspin2"));
             soundEffects.Add(content.Load<SoundEffect>("sfx/tspin3"));
+            soundEffects.Add(content.Load<SoundEffect>("sfx/cursorhover"));
+            soundEffects.Add(content.Load<SoundEffect>("sfx/click"));
+            soundEffects.Add(content.Load<SoundEffect>("sfx/pause"));
             SetVolume();
         }
 
         public void SetVolume()
         {
+            if (Instance.GetGame().CurrentScreen == 3)
+            {
+                if (backgroundTheme.State == SoundState.Stopped && AudioSettings.VOL != 0)
+                {
+                    float vol = AudioSettings.VOL;
+                    backgroundTheme.Volume = 0.75f - (float) (vol / 100) / 2;
+                    backgroundTheme.IsLooped = true;
+                    backgroundTheme.Play();
+                }
+
+                if (AudioSettings.VOL == 0)
+                    backgroundTheme.Stop();
+            }
+
             SoundEffect.MasterVolume = AudioSettings.VOL / 100F;
         }
 
@@ -76,6 +95,52 @@ namespace Tetris.Sound
             mainTheme.Stop();
             fastTheme.Stop();
             rushTheme.Stop();
+        }
+
+        public void PlayPauseMusic(int level)
+        {
+            if (AudioSettings.VOL == 0 || AudioSettings.MUSIC == 0)
+                return;
+            if (level < 5)
+            {
+                if(mainTheme.State == SoundState.Paused)
+                    mainTheme.Resume();
+                else
+                    mainTheme.Pause();
+            }
+            else if (level < 8)
+            {
+                if(fastTheme.State == SoundState.Paused)
+                    fastTheme.Resume();
+                else
+                    fastTheme.Pause();
+            }
+            else
+            {
+                if(rushTheme.State == SoundState.Paused)
+                    rushTheme.Resume();
+                else
+                    rushTheme.Pause();
+            }
+        }
+
+        public void PlayBackground()
+        {
+            if (AudioSettings.VOL == 0 || AudioSettings.MUSIC == 0)
+                return;
+            if (backgroundTheme.State == SoundState.Stopped)
+            {
+                float vol = AudioSettings.VOL;
+                backgroundTheme.Volume = 0.75f - (float) (vol / 100) / 2;
+                backgroundTheme.IsLooped = true;
+                backgroundTheme.Play();
+            }else if (backgroundTheme.State == SoundState.Playing)
+            {
+                backgroundTheme.Stop();
+            }else if (backgroundTheme.State == SoundState.Paused)
+            {
+                backgroundTheme.Resume();
+            }
         }
         
         public void PlayMusic(int level)
@@ -124,7 +189,7 @@ namespace Tetris.Sound
                 else
                     PlaySoundEffect("tspin2");
                 if(!Animate.CurrentlyAnimating())
-                    Globals.scoreTextures[0].AnimateImage(new Vector2(15, 300));
+                    Globals.scoreTextures[0].AnimateImage();
                 Instance.GetScoreHandler().SetBonus(300);
                 Instance.GetPacket().SendPacketFromName("sdb", "1");
             }
@@ -135,7 +200,7 @@ namespace Tetris.Sound
                 else
                     PlaySoundEffect("tspin3");
                 if(!Animate.CurrentlyAnimating())
-                    Globals.scoreTextures[1].AnimateImage(new Vector2(33, 300));
+                    Globals.scoreTextures[1].AnimateImage();
                 Instance.GetScoreHandler().SetBonus(500);
                 Instance.GetPacket().SendPacketFromName("sdb", "2");
             }
@@ -143,7 +208,7 @@ namespace Tetris.Sound
             {
                 soundEffects[9].Play();
                 if(!Animate.CurrentlyAnimating())
-                    Globals.scoreTextures[2].AnimateImage(new Vector2(-5, 300));
+                    Globals.scoreTextures[2].AnimateImage();
                 Instance.GetScoreHandler().SetBonus(800);
                 Instance.GetScoreHandler().Bonuses[3]++;
                 Instance.GetPacket().SendPacketFromName("sdb", "3");

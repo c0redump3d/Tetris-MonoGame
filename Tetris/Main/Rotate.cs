@@ -8,7 +8,7 @@ namespace Tetris.Main
         private int rotationAng = 0; // 0 default
         private int currentBlock = 1;
         private int timesRotated = 0;
-        public readonly int[,,] blocks =
+        public readonly int[,,] Blocks =
         {
             { { 1,0,1,0,1,0 }, { 1,0,0,-1,1,0 }, { 1,0,1,0,-1,0 }, { -1,0,0,1,-1,0 } }, // t block
             { { 1,0,1,1,1,0 }, { 1,0,0,-1,1,1 }, { 0,1,1,0,-1,1 }, { -1,1,1,0,1,0 } }, // z block
@@ -34,7 +34,7 @@ namespace Tetris.Main
                     rotationAng = 3;
             }
             for (int i = 0; i < 6; i++) // sets R1,R2,etc to their values found within the block array(given its rotationAng)
-                rotCheck.RotPos[i] = blocks[currentBlock - 1, rotationAng, i] * 32;
+                rotCheck.RotPos[i] = Blocks[currentBlock - 1, rotationAng, i] * 32;
             //TODO
             if (timesRotated < 10 && Instance.GetPlayer().Grounded) // important to make sure the timer is enabled first.
             {

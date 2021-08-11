@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Drawing;
 using Microsoft.Xna.Framework.Graphics;
 using Tetris.GUI;
 using Tetris.Main;
@@ -26,17 +28,23 @@ namespace Tetris.Other
         private static KeyboardInput _keyListener;
         private static Prediction _predict;
         private static GameSettings _gameSettings;
+        private static RichPresence _richPresence;
         private static Gui _gui;
+        private static GuiDebug _guiDebug;
         private static GuiSettings _guiSettings;
         private static GuiMultiplayer _guiMultiplayer;
         private static MultiplayerHandler _multiplayerHandler;
+        private static TetrisRain _rain;
         private static Packet _packet;
         public static Texture2D CurrentLevelUpImage = Globals.levelUpTextures[0];
         public static bool InMultiplayer = false;
         public static bool AllPlayersConnected = false;
+        public static Texture2D DebugBox;
         
         public Instance()
         {
+            _guiDebug = new GuiDebug();
+            _richPresence = new RichPresence();
             _gameGlobal = new GameGlobal();
             _rand = new Random();
             _sfx = new Sfx();
@@ -56,6 +64,8 @@ namespace Tetris.Other
             _guiMultiplayer = new GuiMultiplayer();
             _packet = new Packet();
             _multiplayerHandler = new MultiplayerHandler();
+            _rain = new TetrisRain();
+            _rain.SetUp();
         }
 
         public static Packet GetPacket()
@@ -63,9 +73,24 @@ namespace Tetris.Other
             return _packet;
         }
 
+        public static TetrisRain GetTetrisRain()
+        {
+            return _rain;
+        }
+        
+        public static GuiDebug GetGuiDebug()
+        {
+            return _guiDebug;
+        }
+        
         public static GuiMultiplayer GetGuiMultiplayer()
         {
             return _guiMultiplayer;
+        }
+
+        public static RichPresence GetRichPresence()
+        {
+            return _richPresence;
         }
         
         public static bool IsMultiplayerMode()
