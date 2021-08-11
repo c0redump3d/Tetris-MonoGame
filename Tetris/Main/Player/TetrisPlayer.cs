@@ -2,8 +2,8 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Microsoft.Xna.Framework.Input;
-using Tetris.GameDebug;
 using Tetris.Other;
+using Tetris.Settings;
 
 namespace Tetris.Main.Player
 {
@@ -30,7 +30,7 @@ namespace Tetris.Main.Player
         public bool Grounded { get; private set; }
 
         private int randX;
-        private float gravityInterval = 1000;
+        private double gravityInterval = 1000;
         private double gravityTime = 0;
 
         public bool PlacedAnimation = false;
@@ -50,14 +50,17 @@ namespace Tetris.Main.Player
         private bool forceDrop = false;
         private RowCheck checkRow;
         private readonly Random rand;
-        private readonly Prediction predict;
+        private int TimerWait = 1000;
+        private int SecondsRemaining = 59;
+        private int MinutesRemaining = 2;
+        public int[] TimeElapsed = new int[2];
+        
 
         public TetrisPlayer()
         {
             PlacedRect = new Rectangle[0];
             StoredImage = new Texture2D[0];
             checkRow = Instance.GetRowCheck();
-            predict = Instance.GetPredict();
             rand = Instance.GetRandom();
         }
 
@@ -65,6 +68,15 @@ namespace Tetris.Main.Player
         {
             PlacedRect.Add(new Rectangle(0,9999,0,0),Globals.BlockTexture[7]);
             PlacedRect.Add(new Rectangle(0,9999,0,0),Globals.BlockTexture[7]);
+            if (Instance.GetScoreHandler().SelectedLevel > 10)
+                gravityInterval = 325 - (5 * (Instance.GetScoreHandler().Level - 10));
+            TimerWait = 1000;
+            TimeElapsed = new int[2];
+            if (Instance.GetGame().CurrentMode == 1)
+            {
+                SecondsRemaining = 59;
+                MinutesRemaining = 2;
+            }
         }
 
         /// <summary>
@@ -81,19 +93,24 @@ namespace Tetris.Main.Player
                 {
                     if (PlacedRect[i].Y == Globals.TopOut) // if placed rectangle reaches top of board, end game.
                     {
-                        Debug.DebugMessage($"Rectangle {i} reached top of screen.", 1);
-                        for (int l = 0; l < 4; l++)
-                            Player[l] = new();
-                        showPinch = false;
-                        Instance.GetSound().StopPinch();
-                        Instance.GetSound().StopMusic();
-                        Instance.GetGame().ShakeStart = gameTime.ElapsedGameTime.Milliseconds;
-                        Instance.GetGame().ScreenShake = true;
-                        Instance.GetPacket().SendPacketFromName("end");
+                        Instance.GetGuiDebug().DebugMessage($"Rectangle {i} reached top of screen.");
+                        EndGame(gameTime);
                         return;
                     }
                 }
             }
+        }
+
+        private void EndGame(GameTime gameTime)
+        {
+            for (int l = 0; l < 4; l++)
+                Player[l] = new();
+            showPinch = false;
+            Instance.GetSound().StopPinch();
+            Instance.GetSound().StopMusic();
+            Instance.GetGame().ShakeStart = gameTime.ElapsedGameTime.Milliseconds;
+            Instance.GetGame().ScreenShake = true;
+            Instance.GetPacket().SendPacketFromName("end");
         }
         
         private void UpdatePlacedAnim(GameTime gameTime)
@@ -130,6 +147,7 @@ namespace Tetris.Main.Player
                     placedFinished = false;
                     PlacedAnimation = false;
                     Instance.GetGame().GameOver = true;
+                    Instance.GetRichPresence().UpdatePresence();
                     Instance.GetGame().EndGame();
                 }
             }
@@ -157,7 +175,7 @@ namespace Tetris.Main.Player
                         ConfirmTime = -1;
                     Instance.GetHoldShape().DisallowSwap();
                     Grounded = true;
-                    if (ConfirmTime > 0 || PlyY < Globals.TopOut)
+                    if (ConfirmTime > 0 || PlyY < -112)
                         return;
                     bool tSpin = false;
                     if (Instance.GetRotate().GetCurShape() == 1) // if we are a tblock, check to see if we did a tspin
@@ -181,27 +199,29 @@ namespace Tetris.Main.Player
                         }
                         else if (GetLinesCleared() == 1)
                         {
-                            Globals.scoreTextures[3].AnimateImage(new Vector2(52, 250));
+                            Globals.scoreTextures[3].AnimateImage();
                             Instance.GetScoreHandler().Bonuses[0]++;
                             Instance.GetScoreHandler().SetBonus(800);
                         }
                         else if (GetLinesCleared() == 2)
                         {
-                            Globals.scoreTextures[4].AnimateImage(new Vector2(40, 250));
+                            Globals.scoreTextures[4].AnimateImage();
                             Instance.GetScoreHandler().Bonuses[1]++;
                             Instance.GetScoreHandler().SetBonus(1200);
                         }
                         else if (GetLinesCleared() == 3)
                         {
-                            Globals.scoreTextures[5].AnimateImage(new Vector2(53, 250));
+                            Globals.scoreTextures[5].AnimateImage();
                             Instance.GetScoreHandler().Bonuses[2]++;
                             Instance.GetScoreHandler().SetBonus(1600);
                         }
                     }
 
-                    if (GetLinesCleared() > 1 && Instance.GetScoreHandler().Level > 6)
+                    //for hardcore mode
+                    if (Instance.GetGame().CurrentMode == 3 && checkRow.GetActualLinesCleared() is > 1 and < 4 && !tSpin)
                     {
-                        RandomBlock(1);
+                        if(GetLinesCleared() != 4) // don't punish for getting a tetris
+                            RandomBlock(checkRow.GetActualLinesCleared()-1);
                     }
 
                     SetPlayerShape(Instance.GetNextShape().GetNextShape(), true);
@@ -217,21 +237,24 @@ namespace Tetris.Main.Player
                     Instance.GetHoldShape().AllowSwap();
 
                     Instance.GetPacket().SendPacketFromName("plc");
+                    checkRow.GreyRemoved = 0;
+
                 }
                 else { Grounded = false; }
             }// Don't worry to much if exception is raised, OutOfBoundsException can be raised if PlacedRect is modified while looping through its content
-            catch (Exception) { }
+            catch (Exception) {}
         }
 
         public bool InstantFall()
         {
-            if (PlyY < -48)
-                return false;
             forceDrop = true;
             for (int i = 0; i < 25; i++)
             {
                 if (!IsColliding())
+                {
                     PlyY += 32;
+                    Instance.GetScoreHandler().Score += 2;
+                }
                 else
                     break;
                 UpdateRectangles();
@@ -246,6 +269,7 @@ namespace Tetris.Main.Player
         /// <returns>True if player is above any blocks</returns>
         private bool IsColliding()
         {
+            UpdateRectangles();
             for (int i = PlacedRect.Length - 1; i > 0; i--)
                 if (Player[0].Y == PlacedRect[i].Y - 32 && Player[0].X == PlacedRect[i].X
                     || Player[1].Y == PlacedRect[i].Y - 32 && Player[1].X == PlacedRect[i].X
@@ -256,30 +280,21 @@ namespace Tetris.Main.Player
             if (Player[0].Y == Globals.MaxY || Player[1].Y == Globals.MaxY || Player[2].Y == Globals.MaxY ||
                 Player[3].Y == Globals.MaxY)
                 return true;
-
+            
             return false;
         }
         
         /// <summary>
-        /// Sets predefined gravity intervals for game, if # > 9, we subtract 5 each level
+        /// Calculates the gravity for the given level (equation from: https://tetris.fandom.com/wiki/Tetris_Worlds#Gravity)
         /// </summary>
         /// <param name="level">Current level</param>
         public void SetGravity(int level)
         {
-            gravityInterval = level switch
-            {
-                1 => 1000,
-                2 => 925,
-                3 => 850,
-                4 => 775,
-                5 => 700,
-                6 => 625,
-                7 => 550,
-                8 => 475,
-                9 => 400,
-                10 => 325,
-                _ => gravityInterval > 50 ? gravityInterval - 5 : 50
-            };
+            if (level > 20)
+                level = 20;
+            
+            gravityInterval = Math.Round(Math.Pow((0.8 - ((level - 1) * 0.007)),(level - 1)),5) * 1000;
+            Instance.GetGuiDebug().DebugMessage($"Set gravity to {gravityInterval}ms");
         }
         
         /// <summary>
@@ -306,7 +321,7 @@ namespace Tetris.Main.Player
             {
                 if (Player[0].Y != Globals.MaxY && Player[1].Y != Globals.MaxY && Player[2].Y != Globals.MaxY &&
                     Player[3].Y != Globals.MaxY &&
-                    !Keyboard.GetState().IsKeyDown(Keys.S)) // make sure we aren't at the bottom of the board.
+                    !Keyboard.GetState().IsKeyDown(MovementKeys.DOWN)) // make sure we aren't at the bottom of the board.
                     PlyY += 32;
                 gravityTime = gravityInterval;
                 Instance.GetPacket().SendPacketFromName("pos"); // send current player position to client/server
@@ -318,7 +333,7 @@ namespace Tetris.Main.Player
         /// </summary>
         public void Reset()
         {
-            Debug.DebugMessage("GAME: Start", 1);
+            Instance.GetGuiDebug().DebugMessage("Game Started");
 
             Instance.CurrentLevelUpImage = Globals.levelUpTextures[0];
             Instance.GetNextShape().ResetList(); // reset shape list and shuffle
@@ -336,14 +351,50 @@ namespace Tetris.Main.Player
 
         public void Update(GameTime gameTime)
         {
+            //Used for keeping track of the elapsed time of the current game
+            TimerWait -= gameTime.ElapsedGameTime.Milliseconds;
+
+            if (TimerWait <= 0 && Instance.GetGame().CanMove)
+            {
+                TimerWait = 1000;
+                if (Instance.GetGame().CurrentMode == 1)
+                {
+                    if (SecondsRemaining != 0)
+                    {
+                        SecondsRemaining--;
+                    }
+                    else
+                    {
+                        if (MinutesRemaining != 0)
+                        {
+                            SecondsRemaining = 59;
+                            MinutesRemaining--;
+                        }
+                    }
+                }
+                else
+                {
+                    if (TimeElapsed[1] != 59)
+                    {
+                        TimeElapsed[1]++;
+                    }
+                    else
+                    {
+                        TimeElapsed[1] = 0;
+                        TimeElapsed[0]++;
+                    }
+                }
+            }
+
             bool found = false;
-            for (int i = 0; i < PlacedRect.Length; i++)
+            for (int i = 0; i < PlacedRect.Length; i++) // check if there is any blocks higher than y 128
             {
                 if (PlacedRect[i].Y < 128)
                     found = true;
             }
 
-            if (found && !PlacedAnimation)
+            if ((found || MinutesRemaining == 0 && SecondsRemaining <= 30 && Instance.GetGame().CurrentMode == 1) &&
+                Instance.GetGame().CanMove && !Instance.GetGame().Paused)
             {
                 showPinch = true;
                 Instance.GetSound().PlayPinch();
@@ -354,12 +405,21 @@ namespace Tetris.Main.Player
                 Instance.GetSound().StopPinch();
             }
 
+            if (Instance.GetGame().CurrentMode == 2 && Instance.GetScoreHandler().TotalLines >= 40 &&
+                Instance.GetGame().CanMove || Instance.GetGame().CurrentMode == 1 && MinutesRemaining == 0 &&
+                SecondsRemaining == 0 && Instance.GetGame().CanMove)
+            {
+                Instance.GetGame().Winner = true;
+                PlacedRect.Add(new Rectangle(-32, Globals.TopOut, 32, 32), Globals.BlockPlacedTexture[7]);
+                EndGame(gameTime);
+            }
+
             BlockCollision(gameTime);
             HitTop(gameTime);
             UpdatePlacedAnim(gameTime);
         }
-        
-        public void DrawPlayer(SpriteBatch _spriteBatch, GameTime gameTime)
+
+        public void DrawPlayer(SpriteBatch _spriteBatch)
         {
             UpdateRectangles();
             //draw player rectangles
@@ -367,15 +427,16 @@ namespace Tetris.Main.Player
             {
                 _spriteBatch.Draw(currentTetImage, Player[i], Color.White);
             }
+
             for (int i = 0; i < PlacedRect.Length; i++)
             {
                 _spriteBatch.Draw(StoredImage[i], PlacedRect[i], Color.White);
             }
-            
+
             if (showPinch)
             {
-                _spriteBatch.Draw(Globals.pinchOverlay, new Vector2(0,0), Color.White * pinchOpacity);
-                
+                _spriteBatch.Draw(Globals.pinchOverlay, new Vector2(0, 0), Color.White * pinchOpacity);
+
                 pinchOpacity += 0.02f * pinchDirection;
                 if (pinchOpacity > 1.0)
                     pinchDirection = -1;
@@ -383,7 +444,19 @@ namespace Tetris.Main.Player
                     pinchDirection = 1;
             }
 
-            if (Debug.IsEnabled() && Debug.GetSelection() == 1)
+            if (Instance.GetGuiDebug().IsOptionEnabled(1))
+            {
+                _spriteBatch.DrawString(Globals.ConsoleFont, "ply", new Vector2(Player[0].X + 3, Player[0].Y + 5),
+                    Color.Black);
+                _spriteBatch.DrawString(Globals.ConsoleFont, "rgt", new Vector2(Player[1].X + 4, Player[1].Y + 5),
+                    Color.Black);
+                _spriteBatch.DrawString(Globals.ConsoleFont, "lft", new Vector2(Player[2].X + 5, Player[2].Y + 5),
+                    Color.Black);
+                _spriteBatch.DrawString(Globals.ConsoleFont, "top", new Vector2(Player[3].X + 3, Player[3].Y + 5),
+                    Color.Black);
+            }
+
+            if (Instance.GetGuiDebug().IsOptionEnabled(2))
             {
                 Rectangle[] positions = {Player[0], Player[1], Player[2], Player[3]};
                 int lastY = 0;
@@ -403,21 +476,36 @@ namespace Tetris.Main.Player
                             break;
                     }
 
-                    _spriteBatch.DrawString(Globals.hoog_12, $"({i})X: {positions[i].X} Y: {positions[i].Y} {blPos}", new Vector2(0, (i * 18)), Color.White * 0.5F);
+                    _spriteBatch.DrawString(Globals.ConsoleFont,
+                        $"({i})X: {positions[i].X} Y: {positions[i].Y} {blPos}",
+                        new Vector2(0, (i * 14)), Color.White * 0.5F);
                     lastY = i + 1;
                 }
 
-                _spriteBatch.DrawString(Globals.hoog_12, "ply", new Vector2(Player[0].X + 3, Player[0].Y + 5), Color.Black);
-                _spriteBatch.DrawString(Globals.hoog_12, "rgt", new Vector2(Player[1].X + 4, Player[1].Y + 5), Color.Black);
-                _spriteBatch.DrawString(Globals.hoog_12, "lft", new Vector2(Player[2].X + 5, Player[2].Y + 5), Color.Black);
-                _spriteBatch.DrawString(Globals.hoog_12, "top", new Vector2(Player[3].X + 3, Player[3].Y + 5), Color.Black);
-                _spriteBatch.DrawString(Globals.hoog_12, $"shape/ang: {Instance.GetRotate().GetCurShape()},{Instance.GetRotate().GetCurAngle()}", new Vector2(0, lastY * 18), Color.White * 0.5F);
-                _spriteBatch.DrawString(Globals.hoog_12, $"gravity: {gravityInterval}ms", new Vector2(0, ++lastY * 18), Color.White * 0.5F);
-                _spriteBatch.DrawString(Globals.hoog_12, $"grounded: {Grounded}", new Vector2(0, ++lastY * 18), Color.White * 0.5F);
-                _spriteBatch.DrawString(Globals.hoog_12, $"framerate: {(int)(1 / gameTime.ElapsedGameTime.TotalSeconds)}", new Vector2(0,++lastY * 18), Color.White * 0.5F);
+                _spriteBatch.DrawString(Globals.ConsoleFont,
+                    $"shape/ang: {Instance.GetRotate().GetCurShape()},{Instance.GetRotate().GetCurAngle()}",
+                    new Vector2(0, lastY * 14), Color.White * 0.5F);
+                _spriteBatch.DrawString(Globals.ConsoleFont, $"gravity: {gravityInterval:n2}ms",
+                    new Vector2(0, ++lastY * 14),
+                    Color.White * 0.5F);
+                _spriteBatch.DrawString(Globals.ConsoleFont, $"grounded: {Grounded}", new Vector2(0, ++lastY * 14),
+                    Color.White * 0.5F);
+            }
+
+            if (Instance.GetGuiDebug().IsOptionEnabled(3))
+            {
                 for (int i = 0; i < 4; i++)
                     _spriteBatch.Draw(currentTetImage,
                         Instance.GetRotateCheck().GetRotationBlocks()[i], Color.White * 0.2F);
+            }
+
+            if (Instance.GetGame().CurrentMode == 1)
+            {
+                string secondsText = SecondsRemaining < 10 ? $"0{SecondsRemaining}" : $"{SecondsRemaining}";
+            
+                _spriteBatch.DrawString(Globals.hoog_12,
+                    $"Time Remaining: {MinutesRemaining}:{secondsText}",
+                    new Vector2(0, 0), Color.White);
             }
         }
 
@@ -439,17 +527,18 @@ namespace Tetris.Main.Player
         {
             if (PlacedAnimation)
                 return;
+            
             //reset player pos
-            PlyY = -112;
-            PlyX = 160;
+            PlyY = shape == 5 ? -144 : -112;
+            PlyX = 128;
 
             Instance.GetRotate().SetCurShape(shape);
             Instance.GetRotateCheck().SetAllPositions();
 
             //set player to what ever number was selected
             SetShape();
-
-            for (int i = 0; i < 3; i++) {
+            
+            for (int i = 0; shape == 4 ? i < 2 : i < 3; i++) {
                 UpdateRectangles();
                 if (!IsColliding())
                     PlyY += 32;
@@ -467,11 +556,10 @@ namespace Tetris.Main.Player
             int shape = Instance.GetRotate().GetCurShape() - 1;
 
             for (int i = 0; i < PlayerPos.Length; i++)
-                PlayerPos[i] = Instance.GetRotate().blocks[shape, 0, i] * 32;
+                PlayerPos[i] = Instance.GetRotate().Blocks[shape, 0, i] * 32;
             currentTetImage = Globals.BlockTexture[shape];
             Instance.GetRotate().ResetRot();
             Instance.GetRotateCheck().SetAllPositions(); // update the rotate check positions
-            Debug.DebugMessage("PLAYER: Shape set(" + Instance.GetRotate().GetCurShape() + ")", 1);
         }
         
         /// <summary>
@@ -481,7 +569,7 @@ namespace Tetris.Main.Player
         public void RandomBlock(int rows)
         {
             int y = Globals.MaxY;
-            Debug.DebugMessage($"GAME: Generating {rows} random row(s)", 1);
+            Instance.GetGuiDebug().DebugMessage($"Generating {rows} random row(s)");
             
             for (int f = 0; f < rows; f++)
             for (int g = PlacedRect.Length - 1; g > 0; g--)
@@ -493,7 +581,7 @@ namespace Tetris.Main.Player
                     PlyY -= 32;
 
                 int x = 0;
-                randX = rand.Next(1, 11); // where the empty hole will be
+                randX = rand.Next(1,11); // where the empty hole will be
 
                 for (int i = PlacedRect.Length - 1; i > 1; i--)
                     if (x == PlacedRect[i].X && y == PlacedRect[i].Y) // if there is for some reason a block at the location already, do not place

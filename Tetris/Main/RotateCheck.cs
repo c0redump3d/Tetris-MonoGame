@@ -1,10 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Tetris.GameDebug;
 using Tetris.Main.Player;
 using Tetris.Other;
 
@@ -99,7 +93,7 @@ namespace Tetris.Main
                     checkY += check[checkPosAt, i, 1] * 32;
                     if (!IsOutOfBounds())
                     {
-                        Debug.DebugMessage($"Found position: X:{check[checkPosAt, i, 0] * 32},Y:{check[1, i, 1] * 32}", 1);
+                        Instance.GetGuiDebug().DebugMessage($"Found position: X:{check[checkPosAt, i, 0] * 32},Y:{check[1, i, 1] * 32}");
                         SetPlayerPosition();
                         break;
                     }
@@ -117,7 +111,7 @@ namespace Tetris.Main
             else
             {
                 Instance.GetRotate().RotatePiece(!clockwise);
-                Debug.DebugMessage("Failed to find a position to rotate to.", 1);
+                Instance.GetGuiDebug().DebugMessage("Failed to find a position to rotate to.");
             }
         }
 
@@ -151,7 +145,7 @@ namespace Tetris.Main
                         checkX += 32;
                         if (!IsOutOfBounds())
                         {
-                            Debug.DebugMessage($"T-Spin failed at check {i} (X+32)", 1);
+                            Instance.GetGuiDebug().DebugMessage($"T-Spin failed at check {i} (X+32)");
                             return false;
                         }
                         break;
@@ -159,7 +153,7 @@ namespace Tetris.Main
                         checkX -= 32;
                         if (!IsOutOfBounds())
                         {
-                            Debug.DebugMessage($"T-Spin failed at check {i} (X-32)", 1);
+                            Instance.GetGuiDebug().DebugMessage($"T-Spin failed at check {i} (X-32)");
                             return false;
                         }
                         break;
@@ -167,7 +161,7 @@ namespace Tetris.Main
                         checkY += 32;
                         if (!IsOutOfBounds())
                         {
-                            Debug.DebugMessage($"T-Spin failed at check {i} (Y+32)", 1);
+                            Instance.GetGuiDebug().DebugMessage($"T-Spin failed at check {i} (Y+32)");
                             return false;
                         }
                         break;
@@ -175,13 +169,13 @@ namespace Tetris.Main
                         checkY -= 32;
                         if (!IsOutOfBounds())
                         {
-                            Debug.DebugMessage($"T-Spin failed at check {i} (Y-32)", 1);
+                            Instance.GetGuiDebug().DebugMessage($"T-Spin failed at check {i} (Y-32)");
                             return false;
                         }
                         break;
                 }
             }
-            Debug.DebugMessage("T-Spin lock detected!", 1);
+            Instance.GetGuiDebug().DebugMessage("T-Spin lock detected!");
             return true;
         }
 

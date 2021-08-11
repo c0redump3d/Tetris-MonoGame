@@ -23,7 +23,7 @@ namespace Tetris.Main.Player
             if (Remove)
                 CleanUp();
             
-            var scoreText = Score > 999999 ? "999999" : $"{Score}";
+            var scoreText = Score > 999999 ? "999,999" : $"{Score:n0}";
             var font = Score > 1000 ? Score > 10000 ? Globals.hoog_18 : Globals.hoog_24 : Globals.hoog_28;
             Instance.GetGui().ScoreText = $@"{scoreText}";
             Instance.GetGui().ScoreFont = font;
@@ -69,16 +69,21 @@ namespace Tetris.Main.Player
             else
                  Instance.GetGui().LineText = $@"{TotalLines}";
             WasTSpin = false;
+            
+            Instance.GetRichPresence().UpdatePresence(); // update discord rpc to reflect new level/score.
             // GameBoard.Invalidate();
         }
         
         private void LevelUp()
         {
+            if (Instance.GetGame().CurrentMode is 1 or 2)
+                return;
+            
             Level++;
             string addZero = Level < 10 ? "0" : "";
             Instance.GetGui().LevelText = $@"{addZero}{Level}";
             Instance.GetPlayer().SetGravity(Level);
-            Instance.CurrentLevelUpImage.AnimateImage(new Vector2(65, 250));
+            Instance.CurrentLevelUpImage.AnimateImage();
             if(Level != 5 && Level != 8)
                  Instance.GetSound().PlaySoundEffect("lvlup");
             else

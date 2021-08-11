@@ -24,23 +24,23 @@ namespace Tetris.GUI
             buttons.Clear();
             UpdateText();
             UpdateDictionaries();
-            buttons.Add(new Button(0,new Rectangle(240,50,0,0), bindText[0], Globals.hoog_18));
-            buttons.Add(new Button(1,new Rectangle(240,80,0,0), bindText[1], Globals.hoog_18));
-            buttons.Add(new Button(2,new Rectangle(240,110,0,0), bindText[2], Globals.hoog_18));
-            buttons.Add(new Button(3,new Rectangle(240,140,0,0), bindText[3], Globals.hoog_18));
-            buttons.Add(new Button(4,new Rectangle(240,170,0,0), bindText[4], Globals.hoog_18));
-            buttons.Add(new Button(5,new Rectangle(240,200,0,0), bindText[5], Globals.hoog_18));
-            buttons.Add(new Button(6,new Rectangle(240,230,0,0), bindText[6], Globals.hoog_18));
+            buttons.Add(new Button(0,new Rectangle(245,55,0,0), bindText[0], Globals.hoog_18));
+            buttons.Add(new Button(1,new Rectangle(245,90,0,0), bindText[1], Globals.hoog_18));
+            buttons.Add(new Button(2,new Rectangle(245,125,0,0), bindText[2], Globals.hoog_18));
+            buttons.Add(new Button(3,new Rectangle(245,160,0,0), bindText[3], Globals.hoog_18));
+            buttons.Add(new Button(4,new Rectangle(245,195,0,0), bindText[4], Globals.hoog_18));
+            buttons.Add(new Button(5,new Rectangle(245,230,0,0), bindText[5], Globals.hoog_18));
+            buttons.Add(new Button(6,new Rectangle(245,265,0,0), bindText[6], Globals.hoog_18));
             for (int i = 0; i < 7; i++)
                 buttons[i].OnClick += BindClick;
             musicSetting = AudioSettings.MUSIC == 1 ? "On" : "Off";
-            buttons.Add(new Button(7,new Rectangle(240,260,0,0), $"Music: {musicSetting}", Globals.hoog_18));
+            buttons.Add(new Button(7,new Rectangle(245,300,0,0), $"Music: {musicSetting}", Globals.hoog_18));
             buttons[7].OnClick += AudioClick;
-            buttons.Add(new Button(8,new Rectangle(480,300,0,0),">", Globals.hoog_18, false));
-            buttons.Add(new Button(9,new Rectangle(300,300,0,0),"<", Globals.hoog_18, false));
+            buttons.Add(new Button(8,new Rectangle(480,340,0,0),">", Globals.hoog_18,false));
+            buttons.Add(new Button(9,new Rectangle(300,340,0,0),"<", Globals.hoog_18,false));
             buttons[8].OnClick += AudioClick;
             buttons[9].OnClick += AudioClick;
-            buttons.Add(new Button(9,new Rectangle(320,350,0,0),"MAIN MENU", Globals.hoog_18));
+            buttons.Add(new Button(9,new Rectangle(320,385,0,0),"MAIN MENU", Globals.hoog_18));
             buttons[10].OnClick += (s) => Instance.GetGui().AddMenuButtons();
         }
         
@@ -70,7 +70,7 @@ namespace Tetris.GUI
         
         private bool IsButtonBound(Keys key)
         {
-            foreach (Keys check in MovementKeys.CONTROLS.Values)
+            foreach (Keys check in MovementKeys.CONTROLS.Values) // see if pressed button is already bound
             {
                 if (check == key)
                 {
@@ -114,12 +114,12 @@ namespace Tetris.GUI
         {
             Button but = ((Button) sender);
 
-            if (CurrentlyFocused)
+            if (CurrentlyFocused) // allows user to cancel bind
             {
                 but.Text = bindText[but.Id];
                 activeButton = -1;
                 CurrentlyFocused = false;
-                EnableAllButtons();
+                EnableAllButtons(); // reenable other buttons
                 return;
             }
 
@@ -139,7 +139,7 @@ namespace Tetris.GUI
                 if (but.Id == activeButton)
                 {
                     
-                    if (IsButtonBound(key))
+                    if (IsButtonBound(key)) // if the button is already bound we cancel
                     {
                         but.Text = bindText[but.Id];
                         activeButton = -1;
@@ -151,7 +151,7 @@ namespace Tetris.GUI
                     CurrentlyFocused = false;
                     string translatedKey = $"{key}".Contains("oem", StringComparison.OrdinalIgnoreCase)
                         ? $"{key}".Remove(0, 3)
-                        : $"{key}";
+                        : $"{key}"; // makes the text look cleaner to the user
                     but.Text = $"{bindText[activeButton].Split(':')[0]}: {translatedKey}";
                     keys[but.Text.Split(':')[0].Replace(" ", "")] = key;
                 }
@@ -193,8 +193,8 @@ namespace Tetris.GUI
         
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.DrawCenteredString(Globals.hoog_28, "SETTINGS", new Vector2(394,35), Color.Aqua);
-            spriteBatch.DrawCenteredString(Globals.hoog_18, $"Volume: {AudioSettings.VOL}", new Vector2(395,313), Color.White);
+            spriteBatch.DrawCenteredString(Globals.hoog_28, "SETTINGS", new Vector2(394,35), Color.White);
+            spriteBatch.DrawCenteredString(Globals.hoog_18, $"Volume: {AudioSettings.VOL}", new Vector2(395,353), Color.White * Instance.GetGui().FadeOpacity);
             
             foreach (var but in buttons)
             {

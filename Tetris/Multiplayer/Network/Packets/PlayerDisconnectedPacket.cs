@@ -1,5 +1,4 @@
-﻿using Tetris.GameDebug;
-using Tetris.Other;
+﻿using Tetris.Other;
 
 namespace Tetris.Multiplayer.Network.Packets
 {
@@ -13,7 +12,7 @@ namespace Tetris.Multiplayer.Network.Packets
             Instance.AllPlayersConnected = false;
             Instance.GetMultiplayerHandler().HideMultiplayer();
             
-            Debug.DebugMessage(@"Disconnected.", IsServer() ? 3 : 4);
+            Instance.GetGuiDebug().DebugMessage(@"Disconnected from player.");
             
             if(IsServer())
                 Server.CloseConnection();

@@ -11,6 +11,7 @@ namespace Tetris.Other
 {
     public static class Utils
     {
+        private static Texture2D sTexture;
 
         /// <summary>
         /// This is a more complicated randomizer for Lists, and allows a list to be 'shuffled' around.
@@ -35,12 +36,12 @@ namespace Tetris.Other
         }
         
         public static void DrawCenteredString(this SpriteBatch spriteBatch, SpriteFont spriteFont,
-            string text, Vector2 position, Color color)
+            string text, Vector2 position, Color color, float shadowOpacity = 0.3f)
         {
             Vector2 size = spriteFont.MeasureString(text);
-            spriteBatch.DrawString(spriteFont, text, position - size / 2f, color);
+            spriteBatch.DrawStringWithShadow(spriteFont, text, position - size / 2f, color, shadowOpacity);
         }
-
+        
         /// <summary>
         /// Used to quickly add a rectangle to the PlacedRect array.
         /// </summary>
@@ -91,6 +92,59 @@ namespace Tetris.Other
             //but, nothing important should ever fall down here.
             return Globals.BlockPlacedTexture[7];
         }
+
+        public static void DrawStringWithShadow(this SpriteBatch spriteBatch, SpriteFont font, string text,
+            Vector2 position, Color color, float shadowOpacity = 0.3f)
+        {
+            spriteBatch.DrawString(font, text, new Vector2(position.X + 3, position.Y + 3),
+                Instance.GetGui().FadeOpacity is > 0.7f and < 1.0f
+                    ?
+                    Color.Black * (Instance.GetGui().FadeOpacity - 0.7f)
+                    : Instance.GetGui().FadeOpacity >= 1.0f
+                        ? Color.Black * shadowOpacity
+                        : Color.Black * 0);
+            spriteBatch.DrawString(font, text, position, color * Instance.GetGui().FadeOpacity);
+        }
+
+        private static Texture2D GetTexture(SpriteBatch spriteBatch) {
+            if (sTexture == null) {
+                sTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+                sTexture.SetData(new[] {Color.White});
+            }
+
+            return sTexture;
+        }
+        
+        /// <summary>
+        /// Draws a line between two points.
+        /// </summary>
+        /// <param name="spriteBatch">SpriteBatch.</param>
+        /// <param name="point1">Point1 (Vector2).</param>
+        /// <param name="point2">Point2 (Vector2).</param>
+        /// <param name="color">The Color of the Line.</param>
+        /// <param name="thickness">The thickness of the line (default is 1f).</param>
+        public static void DrawLine(this SpriteBatch spriteBatch, Vector2 point1, Vector2 point2, Color color, float thickness = 1f) {
+            var distance = Vector2.Distance(point1, point2);
+            var angle = (float) Math.Atan2(point2.Y - point1.Y, point2.X - point1.X);
+            DrawLine(spriteBatch, point1, distance, angle, color, thickness);
+        }
+
+        public static void DrawBorderedRect(this SpriteBatch spriteBatch, Rectangle rect, Color inside, Color outside, float thickness = 1f)
+        {
+            spriteBatch.Draw(Instance.DebugBox,rect, inside);
+            
+            spriteBatch.DrawLine(new Vector2(rect.Left,rect.Top), new Vector2(rect.Left + rect.Width,rect.Top), outside, thickness);
+            spriteBatch.DrawLine(new Vector2(rect.Left,rect.Top), new Vector2(rect.Left,rect.Bottom), outside, thickness);
+            spriteBatch.DrawLine(new Vector2(rect.Left,rect.Bottom), new Vector2(rect.Left + rect.Width,rect.Bottom), outside, thickness);
+            spriteBatch.DrawLine(new Vector2(rect.Right,rect.Top), new Vector2(rect.Left + rect.Width,rect.Bottom), outside, thickness);
+        }
+        
+        private static void DrawLine(this SpriteBatch spriteBatch, Vector2 point, float length, float angle, Color color, float thickness = 1f) {
+            var origin = new Vector2(0f, 0.5f);
+            var scale = new Vector2(length, thickness);
+            spriteBatch.Draw(GetTexture(spriteBatch), point, null, color, angle, origin, scale, SpriteEffects.None, 0);
+        }
+        
         
         /// <summary>
         /// This method is used to translate the current color of the players block color. This is because the network packet sends the color of shape with one letter, for example blue = b.

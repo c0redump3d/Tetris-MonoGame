@@ -217,10 +217,12 @@ namespace Tetris.Main.Player
             if (whereAt == 7)
             {
                 shapeList.Shuffle();
+                Instance.GetGuiDebug().DebugMessage($"Next Bag: {shapeList[0]},{shapeList[1]},{shapeList[2]},{shapeList[3]},{shapeList[4]}");
             }
             if (whereAt == 14)
             {
                 nextShapeList.Shuffle();
+                Instance.GetGuiDebug().DebugMessage($"Next Bag: {nextShapeList[0]},{nextShapeList[1]},{nextShapeList[2]},{nextShapeList[3]},{nextShapeList[4]}");
                 whereAt = 0;
             }
             if (whereAt < 7)

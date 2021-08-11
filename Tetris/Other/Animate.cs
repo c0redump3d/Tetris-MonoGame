@@ -9,7 +9,6 @@ namespace Tetris.Other
         //Animation stuff, needs to be moved to separate class later.
         private static Texture2D _scoreImage = Globals.scoreTextures[0];
         private static float _curOpacity = 0.0F;
-        private static Vector2 _scorePoint = new(70, 250);
         private static bool _animateScore = false;
         private static bool _subOpacity = false;
         private static bool _musicTrans = false;
@@ -52,7 +51,7 @@ namespace Tetris.Other
                 }
             }
                 
-            _spriteBatch.Draw(_scoreImage, _scorePoint, Color.White * _curOpacity);
+            _spriteBatch.Draw(_scoreImage, new Vector2((_spriteBatch.GraphicsDevice.Viewport.Width / 2) - (_scoreImage.Width / 2) - 5,(_spriteBatch.GraphicsDevice.Viewport.Height / 2) - (_scoreImage.Height / 2)), Color.White * _curOpacity);
         }
         
         public static void StartCountdown(int pos)
@@ -62,19 +61,19 @@ namespace Tetris.Other
                 case 0:
                     _animationSpeed = 0.03F;
                     Instance.GetSound().PlaySoundEffect("count");
-                    Globals.countTextures[0].AnimateImage(new Vector2(120, 300));
+                    Globals.countTextures[0].AnimateImage();
                     break;
                 case 1:
                     Instance.GetSound().PlaySoundEffect("count");
-                    Globals.countTextures[1].AnimateImage(new Vector2(120, 300));
+                    Globals.countTextures[1].AnimateImage();
                     break;
                 case 2:
                     Instance.GetSound().PlaySoundEffect("count");
-                    Globals.countTextures[2].AnimateImage(new Vector2(135, 300));
+                    Globals.countTextures[2].AnimateImage();
                     break;
                 case 3:
                     _animationSpeed = 0.02F;
-                    Globals.countTextures[3].AnimateImage(new Vector2(40, 300));
+                    Globals.countTextures[3].AnimateImage();
                     Instance.GetGame().EndCountdown();
                     Instance.GetGame().StartGame();
                     _count = 0;
@@ -87,12 +86,12 @@ namespace Tetris.Other
         /// </summary>
         /// <param name="image">Image to animate</param>
         /// <param name="point">Location to draw at</param>
-        public static void AnimateImage(this Texture2D image, Vector2 point)
+        public static void AnimateImage(this Texture2D image)
         {
             _scoreImage = image;
-            _scorePoint = point;
             _curOpacity = 0.0F;
             _animateScore = true;
+            Instance.GetGuiDebug().DebugMessage($"Beginning to animate image: {image.Name}");
         }
         
         public static bool CurrentlyAnimating()
@@ -104,7 +103,7 @@ namespace Tetris.Other
         {
             Instance.GetSound().StopMusic();
             _musicTrans = true;
-            Instance.CurrentLevelUpImage.AnimateImage(new Vector2(65, 250));
+            Instance.CurrentLevelUpImage.AnimateImage();
         }
     }
 }

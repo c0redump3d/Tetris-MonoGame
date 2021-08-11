@@ -12,11 +12,13 @@ namespace Tetris.Other
         public static readonly int LowestY = -48; // the lowest possible Y for the player to be at
         public static readonly int TopOut = -80; // if a block reaches this y position, the game will end
         public static Texture2D[] GuiImage = new Texture2D[2];
+        public static Texture2D GuiGrid;
         public static Texture2D CurrentGuiImage;
         public static Texture2D Stats;
         public static Texture2D TextBoxGui;
         public static int ScreenWidth = 789;
         public static int ScreenHeight = 694;
+        public static string Version = "v1.1";
         public static bool ResizedWindow = false;
         public static string CurrentOS;
         public static readonly Texture2D[] BlockTexture = new Texture2D[8];
@@ -24,7 +26,9 @@ namespace Tetris.Other
         public static readonly Texture2D[] scoreTextures = new Texture2D[6];
         public static readonly Texture2D[] levelUpTextures = new Texture2D[3];
         public static readonly Texture2D[] countTextures = new Texture2D[4];
+        public static Texture2D Logo;
         public static Texture2D pinchOverlay;
+        public static SpriteFont ConsoleFont;
         public static SpriteFont hoog_12;
         public static SpriteFont hoog_16;
         public static SpriteFont hoog_18;
@@ -63,12 +67,15 @@ namespace Tetris.Other
             levelUpTextures[0] = content.Load<Texture2D>("gui/levelup");
             levelUpTextures[1] = content.Load<Texture2D>("gui/levelup5");
             levelUpTextures[2] = content.Load<Texture2D>("gui/levelup8");
+            Logo = content.Load<Texture2D>("gui/tetrislogo");
+            GuiGrid = content.Load<Texture2D>("gui/grid");
             GuiImage[0] = content.Load<Texture2D>("gui/gui");
             GuiImage[1] = content.Load<Texture2D>("gui/guimultiplayer");
             CurrentGuiImage = GuiImage[0];
             Stats = content.Load<Texture2D>("gui/stats");
             TextBoxGui = content.Load<Texture2D>("gui/textbox");
             pinchOverlay = content.Load<Texture2D>("gui/pinchglow");
+            ConsoleFont = content.Load<SpriteFont>("gui/font/consolas_10");
             hoog_12 = content.Load<SpriteFont>("gui/font/hoog_12");
             hoog_16 = content.Load<SpriteFont>("gui/font/hoog_16");
             hoog_18 = content.Load<SpriteFont>("gui/font/hoog_18");

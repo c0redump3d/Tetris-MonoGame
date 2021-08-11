@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Tetris.GameDebug;
 using Tetris.Other;
 
 namespace Tetris.Main.Player
@@ -130,7 +129,7 @@ namespace Tetris.Main.Player
 
             Instance.GetPacket().SendPacketFromName("shp",$"{Instance.GetRotate().GetCurShape()}");
 
-            Debug.DebugMessage($"HOLD_BLOCK: Holding block {shape}", 1);
+            Instance.GetGuiDebug().DebugMessage($"Holding block {shape}");
         }
 
         public void DrawHoldShape(SpriteBatch _spriteBatch)

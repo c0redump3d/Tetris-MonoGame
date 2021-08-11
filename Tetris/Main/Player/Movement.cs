@@ -10,21 +10,14 @@ namespace Tetris.Main.Player
 {
     public class Movement
     {
-        private Prediction predict;
         private Rectangle bOne;
         private Rectangle bTwo;
         private Rectangle bThree;
         private Rectangle bFour;
         private Rectangle[] placedRect;
-        //private readonly Prediction predict;
 
         private int plyX;
         private int plyY;
-
-        public Movement()
-        {
-            predict = Instance.GetPredict();
-        }
 
         private void UpdateLoc()
         {
@@ -65,7 +58,6 @@ namespace Tetris.Main.Player
         /// <summary>
         /// Moves tetris block left one tile.
         /// </summary>
-        /// <param name="paused"></param>
         public void MoveLeft()
         {
             UpdateLoc();
@@ -94,7 +86,7 @@ namespace Tetris.Main.Player
         /// Moves tetris block down a tile.
         /// </summary>
         /// <returns></returns>
-        public bool MoveDown()
+        public void MoveDown()
         {
             UpdateLoc();
             for (int i = placedRect.Length - 1; i > 0; i--)
@@ -102,19 +94,18 @@ namespace Tetris.Main.Player
                     || bTwo.Y == placedRect[i].Y - 32 && bTwo.X == placedRect[i].X
                     || bThree.Y == placedRect[i].Y - 32 && bThree.X == placedRect[i].X
                     || bFour.Y == placedRect[i].Y - 32 && bFour.X == placedRect[i].X)
-                    return false;
+                    return;
+            
             if (bOne.Y != Globals.MaxY && bTwo.Y != Globals.MaxY
                 && bThree.Y != Globals.MaxY && bFour.Y != Globals.MaxY)
             {
                 plyY += 32;
+                Instance.GetScoreHandler().Score++;
                 Instance.GetSound().PlaySoundEffect("move");
                 Instance.GetPlayer().PlyX = plyX;
                 Instance.GetPlayer().PlyY = plyY;
                 Instance.GetPacket().SendPacketFromName("pos");
-                return true;
             }
-
-            return false;
         }
     }
 }

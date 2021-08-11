@@ -1,5 +1,4 @@
-﻿using Tetris.GameDebug;
-using Tetris.Other;
+﻿using Tetris.Other;
 
 namespace Tetris.Multiplayer.Network.Packets
 {
@@ -19,7 +18,7 @@ namespace Tetris.Multiplayer.Network.Packets
                 Instance.GetGui().AddMenuButtons();
                 Instance.GetScoreHandler().SelectedLevel = 1;
             }
-            Debug.DebugMessage("Successfully connected to player!", IsServer() ? 3 : 4, false);
+            Instance.GetGuiDebug().DebugMessage("Successfully connected to player!");
             base.RunPacket();
         }
     }

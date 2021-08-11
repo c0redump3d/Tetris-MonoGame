@@ -20,11 +20,11 @@ namespace Tetris.GUI
             Instance.GetGame().CurrentScreen = 4;//255, 330
             buttons.Add(new Button(0, new Rectangle(327, 360, 0,0), "Connect", Globals.hoog_24));
             if(Server.ServerRunning())
-                buttons.Add(new Button(1, new Rectangle(295, 400, 0,0), "Stop Server", Globals.hoog_24));
+                buttons.Add(new Button(1, new Rectangle(295, 405, 0,0), "Stop Server", Globals.hoog_24));
             else
-                buttons.Add(new Button(1, new Rectangle(285, 400, 0,0), "Start Server", Globals.hoog_24));
-            buttons.Add(new Button(2, new Rectangle(302, 440, 0,0), "Disconnect", Globals.hoog_24));
-            buttons.Add(new Button(3,new Rectangle(293,480,0,0), "MAIN MENU", Globals.hoog_24));
+                buttons.Add(new Button(1, new Rectangle(285, 405, 0,0), "Start Server", Globals.hoog_24));
+            buttons.Add(new Button(2, new Rectangle(302, 450, 0,0), "Disconnect", Globals.hoog_24));
+            buttons.Add(new Button(3,new Rectangle(293,495,0,0), "MAIN MENU", Globals.hoog_24));
             buttons[0].OnClick += AttemptConnect;
             buttons[1].OnClick += RunStopServer;
             buttons[2].OnClick += Disconnect;
@@ -121,16 +121,16 @@ namespace Tetris.GUI
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            spriteBatch.DrawString(Globals.hoog_28, "MULTIPLAYER", new Vector2(250, 20), Color.White);
+            spriteBatch.DrawStringWithShadow(Globals.hoog_28, "MULTIPLAYER", new Vector2(250, 20), Color.White);
             if(Client.IsConnected())
-                spriteBatch.DrawString(Globals.hoog_18, "Connected to server!", new Vector2(257, 100), Color.Green);
+                spriteBatch.DrawStringWithShadow(Globals.hoog_18, "Connected to server!", new Vector2(257, 100), Color.Green);
             if(FailedConnect)
-                spriteBatch.DrawString(Globals.hoog_18, "Failed to connect.", new Vector2(280, 100), Color.Red);
+                spriteBatch.DrawStringWithShadow(Globals.hoog_18, "Failed to connect.", new Vector2(280, 100), Color.Red);
             if(IsConnecting)
-                spriteBatch.DrawString(Globals.hoog_18, "Attempting to connect...", new Vector2(242, 100), Color.White);
+                spriteBatch.DrawStringWithShadow(Globals.hoog_18, "Attempting to connect...", new Vector2(242, 100), Color.White);
             if(Server.ServerRunning())
-                spriteBatch.DrawString(Globals.hoog_18, "Server is running.", new Vector2(285, 100), Color.Green);
-            spriteBatch.DrawString(Globals.hoog_18, "IP Address:", new Vector2(255, 285), Color.White);
+                spriteBatch.DrawStringWithShadow(Globals.hoog_18, "Server is running.", new Vector2(285, 100), Color.Green);
+            spriteBatch.DrawStringWithShadow(Globals.hoog_18, "IP Address:", new Vector2(255, 285), Color.White);
             ipTextBox.Draw(spriteBatch, gameTime);
             foreach (var but in buttons)
             {
