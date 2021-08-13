@@ -15,9 +15,12 @@ namespace Tetris.Other
             client.Initialize();
         }
 
+        /// <summary>
+        /// Updates rich presence to show current scores from in-game
+        /// </summary>
         public void UpdatePresence()
         {
-            string status = Instance.GetGame().GameOver ? "Game Over" : Instance.GetGame().Paused ? "Paused" : "In Game";
+            string status = Instance.GetGame().GameOver ? "Game Over" : Instance.GetGame().Paused ? "Paused" : $"{Instance.GetGame().GameModes[Instance.GetGame().CurrentMode]}";
             client.UpdateDetails($"{status} | Level {Instance.GetScoreHandler().Level}");
             client.UpdateState($"Score - {Instance.GetScoreHandler().Score:n0} | Lines - {Instance.GetScoreHandler().TotalLines}");
         }
@@ -51,7 +54,7 @@ namespace Tetris.Other
             {
                 client.SetPresence(new DiscordRPC.RichPresence()
                 {
-                    Details = $"In Game | Level {Instance.GetScoreHandler().Level}",
+                    Details = $"{Instance.GetGame().GameModes[Instance.GetGame().CurrentMode]} | Level {Instance.GetScoreHandler().Level}",
                     State = $"Score - {Instance.GetScoreHandler().Score:n0} | Lines - {Instance.GetScoreHandler().TotalLines}",
                     Timestamps = Timestamps.Now,
                     Assets = new Assets()

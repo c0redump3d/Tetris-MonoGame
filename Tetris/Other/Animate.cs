@@ -14,17 +14,22 @@ namespace Tetris.Other
         private static bool _musicTrans = false;
         private static float _animationSpeed = 0.02F;
         private static int _count = 0;
+
+        private static int Width;
+        private static int Height;
+
+        private static float Size;
         //TODO: Get rid of this class entirely and implement a better animation system.
         public static void UpdateAnimation(SpriteBatch _spriteBatch)
         {
             if (!_animateScore) return;
-            
+
             if (_curOpacity != 1.0F && !_subOpacity)
             {
                 _curOpacity += _animationSpeed;
             }
 
-            if(_curOpacity >= 1.0F && !_subOpacity)
+            if (_curOpacity >= 1.0F && !_subOpacity)
             {
                 _subOpacity = true;
             }
@@ -41,6 +46,7 @@ namespace Tetris.Other
                     Instance.GetSound().PlayMusic(Instance.GetScoreHandler().Level);
                     _musicTrans = false;
                 }
+
                 _subOpacity = false;
                 _animateScore = false;
                 _curOpacity = 0.0F;
@@ -50,10 +56,17 @@ namespace Tetris.Other
                     StartCountdown(_count);
                 }
             }
-                
-            _spriteBatch.Draw(_scoreImage, new Vector2((_spriteBatch.GraphicsDevice.Viewport.Width / 2) - (_scoreImage.Width / 2) - 5,(_spriteBatch.GraphicsDevice.Viewport.Height / 2) - (_scoreImage.Height / 2)), Color.White * _curOpacity);
+            
+            if(Size < 2.0f)
+                Size += 0.015f;
+
+            _spriteBatch.Draw(_scoreImage,
+                new Vector2((_spriteBatch.GraphicsDevice.Viewport.Width / 2) - 5,
+                    (_spriteBatch.GraphicsDevice.Viewport.Height / 2)), null,
+                Color.White * _curOpacity, 0, new Vector2(Width / 2,Height / 2), Size,
+                SpriteEffects.None, 0f);
         }
-        
+
         public static void StartCountdown(int pos)
         {
             switch (pos)
@@ -91,6 +104,9 @@ namespace Tetris.Other
             _scoreImage = image;
             _curOpacity = 0.0F;
             _animateScore = true;
+            Width = image.Width;
+            Height = image.Height;
+            Size = 0;
             Instance.GetGuiDebug().DebugMessage($"Beginning to animate image: {image.Name}");
         }
         

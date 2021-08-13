@@ -90,7 +90,7 @@ namespace Tetris.Main
                 {
                     movingLeftRight = true;
                     Instance.GetMovement().MoveLeft();
-                    elapsedTime[0] = 150;
+                    elapsedTime[0] = 100;
                 }
             }
             else
@@ -104,7 +104,7 @@ namespace Tetris.Main
                 {
                     movingLeftRight = true;
                     Instance.GetMovement().MoveRight();
-                    elapsedTime[1] = 150;
+                    elapsedTime[1] = 100;
                 }
             }
             else

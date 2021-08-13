@@ -11,7 +11,9 @@ namespace Tetris.GUI
     {
         public event Action<object> OnClick;
         private MouseState oldState;
-        private int waitTime;
+
+        private Color ButtonBackCol = new Color(30, 28, 28);
+        private Color ButtonBorderCol = new Color(43, 149, 223);
 
         public Rectangle Rec { get; set; }
         public string Text { get; set; }
@@ -30,7 +32,6 @@ namespace Tetris.GUI
             this.Text = text;
             this.Font = font;
             this.ShowBox = showBox;
-            waitTime = 1000;
         }
         
         public void Draw(SpriteBatch _spriteBatch, Color col)
@@ -42,12 +43,9 @@ namespace Tetris.GUI
             }
 
             float mult = FadeOpacity > 0.5f ? 0.5f : FadeOpacity - 0.5f;
-
-            Color col1 = new Color(30, 28, 28);
-            Color col2 = new Color(43, 149, 223);
             
             if(FadeOpacity >= 0.4f && ShowBox)
-                _spriteBatch.DrawBorderedRect(new Rectangle((Rec.X - 4) - Size, Rec.Y - Size, (Rec.Width + 6) + Size * 2, Rec.Height + Size * 2), col1 * mult, col2 * FadeOpacity);
+                _spriteBatch.DrawBorderedRect(new Rectangle((Rec.X - 4) - Size, Rec.Y - Size, (Rec.Width + 6) + Size * 2, Rec.Height + Size * 2), ButtonBackCol * mult, ButtonBorderCol * FadeOpacity);
             
             _spriteBatch.DrawStringWithShadow(Font, Text, new Vector2(Rec.X, Rec.Y), Enabled ? Hovering ? Color.SlateGray * FadeOpacity : col * FadeOpacity : Color.Gray);
             
@@ -80,7 +78,7 @@ namespace Tetris.GUI
                 
                 Hovering = true;
 
-                if (Size != 3)
+                if (Size != 3) // used to scale the button's box
                 {
                     Size += 1;
                 }

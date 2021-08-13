@@ -9,30 +9,10 @@ namespace Tetris.Main
 {
     public class TetrisGame : Game
     {
-        /*
-         * 
-         *  Version 1.1 Changes
-         *  -Random Row is now much more forgiving(Tetris' don't punish you, and clearing gray lines don't as well)
-         *  -Buttons will now highlight in gray when hovered instead of the carrot identifier
-         *  -Discord rich presence added, will tell level, score, and lines
-         *  -Levels 11-20 are now selectable on the main menu
-         *  -Fixed player being able to move during screenshake animation
-         *  -Created by text is now clickable and will take you to the github page
-         *  -Added a version identifier in the bottom left
-         *  -Updated icon to reflect current blocks
-         *  -Animated images are now automatically centered to the board
-         *  -Completely revamped debug menu
-         *  -Updated pause menu(pauses music, countdown when unpaused)
-         *  -Fairly large UI updates
-         *      -Copyright notice on startup
-         *      -Buttons now have a bordered rectangle around them
-         *      -Menus now fade in when opened
-         *      -Random tetris pieces fall from screen when on main menu
-         *      -Background music
-         *  -Fixed O block and I block spawn (can prevent game from ending as it can clip through placed blocks)
-         *  -Fixed an issue with random row, if the player gets a tetris but any rows were gray, they will be punished(ex: 3 normal rows and one gray row will punish the player with 2 rows)
-         * 
-         */
+    
+        //TODO: Rewrite gui stuff, make it cleaner
+        //TODO: Change top out logic(Check to see if a full actual shape has locked off-screen)
+    
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private SpriteBatch _spriteBatchGame;
@@ -117,7 +97,7 @@ namespace Tetris.Main
                 Instance.GetMultiplayerHandler().Update(gameTime);
             }
 
-            Instance.GetGui().Update();
+            Instance.GetGui().Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -157,7 +137,7 @@ namespace Tetris.Main
                 else
                     _spriteBatchGame.Begin();
                 Instance.GetPredict().Draw(_spriteBatchGame);
-                Instance.GetPlayer().DrawPlayer(_spriteBatchGame, gameTime);
+                Instance.GetPlayer().DrawPlayer(_spriteBatchGame);
                 _spriteBatchGame.End();
                 _spriteBatchGame.GraphicsDevice.Viewport = defaultViewport;
                 Instance.GetNextShape().RenderNextShapes(_spriteBatch);

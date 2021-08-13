@@ -21,6 +21,7 @@ namespace Tetris.Main.Player
 
         private void UpdateLoc()
         {
+            Instance.GetPlayer().UpdateRectangles();
             bOne = Instance.GetPlayer().Player[0];
             bTwo = Instance.GetPlayer().Player[1];
             bThree = Instance.GetPlayer().Player[2];
@@ -89,23 +90,14 @@ namespace Tetris.Main.Player
         public void MoveDown()
         {
             UpdateLoc();
-            for (int i = placedRect.Length - 1; i > 0; i--)
-                if (bOne.Y == placedRect[i].Y - 32 && bOne.X == placedRect[i].X
-                    || bTwo.Y == placedRect[i].Y - 32 && bTwo.X == placedRect[i].X
-                    || bThree.Y == placedRect[i].Y - 32 && bThree.X == placedRect[i].X
-                    || bFour.Y == placedRect[i].Y - 32 && bFour.X == placedRect[i].X)
-                    return;
-            
-            if (bOne.Y != Globals.MaxY && bTwo.Y != Globals.MaxY
-                && bThree.Y != Globals.MaxY && bFour.Y != Globals.MaxY)
-            {
-                plyY += 32;
-                Instance.GetScoreHandler().Score++;
-                Instance.GetSound().PlaySoundEffect("move");
-                Instance.GetPlayer().PlyX = plyX;
-                Instance.GetPlayer().PlyY = plyY;
-                Instance.GetPacket().SendPacketFromName("pos");
-            }
+            if (Instance.GetPlayer().IsColliding())
+                return;
+            plyY += 32;
+            Instance.GetScoreHandler().Score++;
+            Instance.GetSound().PlaySoundEffect("move");
+            Instance.GetPlayer().PlyX = plyX;
+            Instance.GetPlayer().PlyY = plyY;
+            Instance.GetPacket().SendPacketFromName("pos");
         }
     }
 }

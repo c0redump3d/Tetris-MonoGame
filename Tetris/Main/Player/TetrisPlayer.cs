@@ -50,14 +50,17 @@ namespace Tetris.Main.Player
         private bool forceDrop = false;
         private RowCheck checkRow;
         private readonly Random rand;
-        private readonly Prediction predict;
+        private int TimerWait = 1000;
+        private int SecondsRemaining = 59;
+        private int MinutesRemaining = 2;
+        public int[] TimeElapsed = new int[2];
+        
 
         public TetrisPlayer()
         {
             PlacedRect = new Rectangle[0];
             StoredImage = new Texture2D[0];
             checkRow = Instance.GetRowCheck();
-            predict = Instance.GetPredict();
             rand = Instance.GetRandom();
         }
 
@@ -67,6 +70,13 @@ namespace Tetris.Main.Player
             PlacedRect.Add(new Rectangle(0,9999,0,0),Globals.BlockTexture[7]);
             if (Instance.GetScoreHandler().SelectedLevel > 10)
                 gravityInterval = 325 - (5 * (Instance.GetScoreHandler().Level - 10));
+            TimerWait = 1000;
+            TimeElapsed = new int[2];
+            if (Instance.GetGame().CurrentMode == 1)
+            {
+                SecondsRemaining = 59;
+                MinutesRemaining = 2;
+            }
         }
 
         /// <summary>
@@ -84,18 +94,23 @@ namespace Tetris.Main.Player
                     if (PlacedRect[i].Y == Globals.TopOut) // if placed rectangle reaches top of board, end game.
                     {
                         Instance.GetGuiDebug().DebugMessage($"Rectangle {i} reached top of screen.");
-                        for (int l = 0; l < 4; l++)
-                            Player[l] = new();
-                        showPinch = false;
-                        Instance.GetSound().StopPinch();
-                        Instance.GetSound().StopMusic();
-                        Instance.GetGame().ShakeStart = gameTime.ElapsedGameTime.Milliseconds;
-                        Instance.GetGame().ScreenShake = true;
-                        Instance.GetPacket().SendPacketFromName("end");
+                        EndGame(gameTime);
                         return;
                     }
                 }
             }
+        }
+
+        private void EndGame(GameTime gameTime)
+        {
+            for (int l = 0; l < 4; l++)
+                Player[l] = new();
+            showPinch = false;
+            Instance.GetSound().StopPinch();
+            Instance.GetSound().StopMusic();
+            Instance.GetGame().ShakeStart = gameTime.ElapsedGameTime.Milliseconds;
+            Instance.GetGame().ScreenShake = true;
+            Instance.GetPacket().SendPacketFromName("end");
         }
         
         private void UpdatePlacedAnim(GameTime gameTime)
@@ -202,7 +217,8 @@ namespace Tetris.Main.Player
                         }
                     }
 
-                    if (checkRow.GetActualLinesCleared() is > 1 and < 4 && Instance.GetScoreHandler().Level > 6)
+                    //for hardcore mode
+                    if (Instance.GetGame().CurrentMode == 3 && checkRow.GetActualLinesCleared() is > 1 and < 4 && !tSpin)
                     {
                         if(GetLinesCleared() != 4) // don't punish for getting a tetris
                             RandomBlock(checkRow.GetActualLinesCleared()-1);
@@ -222,16 +238,15 @@ namespace Tetris.Main.Player
 
                     Instance.GetPacket().SendPacketFromName("plc");
                     checkRow.GreyRemoved = 0;
+
                 }
                 else { Grounded = false; }
             }// Don't worry to much if exception is raised, OutOfBoundsException can be raised if PlacedRect is modified while looping through its content
-            catch (Exception ex) {}
+            catch (Exception) {}
         }
 
         public bool InstantFall()
         {
-            if (PlyY < -48)
-                return false;
             forceDrop = true;
             for (int i = 0; i < 25; i++)
             {
@@ -252,7 +267,7 @@ namespace Tetris.Main.Player
         /// Checks if the player is above any blocks within the PlacedRect array.
         /// </summary>
         /// <returns>True if player is above any blocks</returns>
-        private bool IsColliding()
+        public bool IsColliding()
         {
             UpdateRectangles();
             for (int i = PlacedRect.Length - 1; i > 0; i--)
@@ -270,7 +285,7 @@ namespace Tetris.Main.Player
         }
         
         /// <summary>
-        /// Sets predefined gravity intervals for game, if # > 9, we subtract 5 each level
+        /// Calculates the gravity for the given level (equation from: https://tetris.fandom.com/wiki/Tetris_Worlds#Gravity)
         /// </summary>
         /// <param name="level">Current level</param>
         public void SetGravity(int level)
@@ -336,6 +351,41 @@ namespace Tetris.Main.Player
 
         public void Update(GameTime gameTime)
         {
+            //Used for keeping track of the elapsed time of the current game
+            TimerWait -= gameTime.ElapsedGameTime.Milliseconds;
+
+            if (TimerWait <= 0 && Instance.GetGame().CanMove)
+            {
+                TimerWait = 1000;
+                if (Instance.GetGame().CurrentMode == 1)
+                {
+                    if (SecondsRemaining != 0)
+                    {
+                        SecondsRemaining--;
+                    }
+                    else
+                    {
+                        if (MinutesRemaining != 0)
+                        {
+                            SecondsRemaining = 59;
+                            MinutesRemaining--;
+                        }
+                    }
+                }
+                else
+                {
+                    if (TimeElapsed[1] != 59)
+                    {
+                        TimeElapsed[1]++;
+                    }
+                    else
+                    {
+                        TimeElapsed[1] = 0;
+                        TimeElapsed[0]++;
+                    }
+                }
+            }
+
             bool found = false;
             for (int i = 0; i < PlacedRect.Length; i++) // check if there is any blocks higher than y 128
             {
@@ -343,7 +393,8 @@ namespace Tetris.Main.Player
                     found = true;
             }
 
-            if (found && !PlacedAnimation)
+            if ((found || MinutesRemaining == 0 && SecondsRemaining <= 30 && Instance.GetGame().CurrentMode == 1) &&
+                Instance.GetGame().CanMove && !Instance.GetGame().Paused)
             {
                 showPinch = true;
                 Instance.GetSound().PlayPinch();
@@ -354,12 +405,21 @@ namespace Tetris.Main.Player
                 Instance.GetSound().StopPinch();
             }
 
+            if (Instance.GetGame().CurrentMode == 2 && Instance.GetScoreHandler().TotalLines >= 40 &&
+                Instance.GetGame().CanMove || Instance.GetGame().CurrentMode == 1 && MinutesRemaining == 0 &&
+                SecondsRemaining == 0 && Instance.GetGame().CanMove)
+            {
+                Instance.GetGame().Winner = true;
+                PlacedRect.Add(new Rectangle(-32, Globals.TopOut, 32, 32), Globals.BlockPlacedTexture[7]);
+                EndGame(gameTime);
+            }
+
             BlockCollision(gameTime);
             HitTop(gameTime);
             UpdatePlacedAnim(gameTime);
         }
 
-        public void DrawPlayer(SpriteBatch _spriteBatch, GameTime gameTime)
+        public void DrawPlayer(SpriteBatch _spriteBatch)
         {
             UpdateRectangles();
             //draw player rectangles
@@ -438,9 +498,18 @@ namespace Tetris.Main.Player
                     _spriteBatch.Draw(currentTetImage,
                         Instance.GetRotateCheck().GetRotationBlocks()[i], Color.White * 0.2F);
             }
+
+            if (Instance.GetGame().CurrentMode == 1)
+            {
+                string secondsText = SecondsRemaining < 10 ? $"0{SecondsRemaining}" : $"{SecondsRemaining}";
+            
+                _spriteBatch.DrawString(Globals.hoog_12,
+                    $"Time Remaining: {MinutesRemaining}:{secondsText}",
+                    new Vector2(0, 0), Color.White);
+            }
         }
 
-        private void UpdateRectangles()
+        public void UpdateRectangles()
         {
             Player[0] = new Rectangle(PlyX, PlyY, 32, 32); // player controlled rect
             Player[1] = new Rectangle(PlyX + PlayerPos[0], PlyY + PlayerPos[1], 32, 32);

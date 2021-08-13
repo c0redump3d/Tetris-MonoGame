@@ -11,7 +11,7 @@ namespace Tetris.GUI
     public class GuiDebug
     {
         
-        private List<ChatLine> consoleMessageList;
+        private List<DebugLine> consoleMessageList;
         private List<string> debugOptions;
         private List<bool> debugEnabled;
         private int cursorPos = 0;
@@ -24,7 +24,7 @@ namespace Tetris.GUI
 
         public GuiDebug()
         {
-            consoleMessageList = new List<ChatLine>();
+            consoleMessageList = new List<DebugLine>();
             debugOptions = new List<string>();
             debugEnabled = new List<bool>();
             AddOption("Debug Console");
@@ -45,7 +45,7 @@ namespace Tetris.GUI
         {
             //UpdateConsole();
 
-            if (showDebugMenu)
+            if (showDebugMenu) // listen for arrow keypresses to update debug menu
             {
                 keyState = Keyboard.GetState();
 
@@ -116,6 +116,9 @@ namespace Tetris.GUI
             }
         }
 
+        /// <summary>
+        /// This checks to see which debug option has the longest text so that the bordered rect encases everything
+        /// </summary>
         private void CheckLength()
         {
             longestTextX = Globals.ConsoleFont.MeasureString(menuText).X;
@@ -135,10 +138,11 @@ namespace Tetris.GUI
         
         private void DrawConsole(SpriteBatch spriteBatch)
         {
-            int lines = 25;
+            int lines = 25; // how many messages can be on screen
             
             for(int msg = 0; msg < consoleMessageList.Count && msg < lines; msg++)
             {
+                //Message fade is not going to be used for this, but will save code incase
                 /*if(consoleMessageList[msg].UpdateCounter >= 200)
                 {
                     continue;
@@ -173,21 +177,22 @@ namespace Tetris.GUI
             if(IsOptionEnabled(0))
                 AddConsoleMessage($@"{caller}: {message}");
         }
-        
-        public void AddConsoleMessage(string s)
+
+        private void AddConsoleMessage(string s)
         {
             int i;
             int spacing = 230;
-            for(; Globals.ConsoleFont.MeasureString(s).X > spacing; s = s.Substring(i))
+            for(; Globals.ConsoleFont.MeasureString(s).X > spacing; s = s.Substring(i)) //split any text that exceeds out spacing
             {
                 for(i = 1; i < s.Length && Globals.ConsoleFont.MeasureString(s.Substring(0, i + 1)).X <= spacing; i++) { }
                 AddConsoleMessage(s.Substring(0, i));
             }
 
-            consoleMessageList.Insert(0, new ChatLine(s));
-            for(; consoleMessageList.Count > 50; consoleMessageList.RemoveAt(consoleMessageList.Count - 1)) { }
+            consoleMessageList.Insert(0, new DebugLine(s));
+            for(; consoleMessageList.Count > 50; consoleMessageList.RemoveAt(consoleMessageList.Count - 1)) { } // any lines that exceed 50 will be removed
         }
         
+        //Again, this is for message fading, not being used
         // private void UpdateConsole()
         // {
         //     for(int i = 0; i < consoleMessageList.Count; i++)
@@ -196,6 +201,11 @@ namespace Tetris.GUI
         //     }
         // }
 
+        /// <summary>
+        /// Check if a debug option is currently enabled or disabled.
+        /// </summary>
+        /// <param name="mod">Debug Option Index</param>
+        /// <returns>True if debug option is enabled</returns>
         public bool IsOptionEnabled(int mod)
         {
             if (mod < 0 || mod > debugOptions.Count - 1)

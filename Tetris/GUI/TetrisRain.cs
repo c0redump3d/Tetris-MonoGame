@@ -8,7 +8,7 @@ namespace Tetris.GUI
 {
     public class TetrisRain
     {
-        private int[,] rainBlockPos =
+        private readonly int[,] rainBlockPos =
         {
             {0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0},
@@ -27,7 +27,7 @@ namespace Tetris.GUI
             {0,0,0,0,0,0,0,0,0,0}
         };
 
-        private Rectangle[,] rainBlocks =
+        private readonly Rectangle[,] rainBlocks =
         {
             {new(),new(),new(),new()},
             {new(),new(),new(),new()},
@@ -46,9 +46,9 @@ namespace Tetris.GUI
             {new(),new(),new(),new()}
         };
 
-        private int[] rainBlockImage = new int[15];
+        private readonly int[] rainBlockImage = new int[15];
         public float FadeTime = 0f;
-        private int waitTime = 1500;
+        private int waitTime = 100;
         private int gravity = 500;
         
         private Random rand;
@@ -65,6 +65,11 @@ namespace Tetris.GUI
             }
         }
 
+        /// <summary>
+        /// Chooses a random shape and rotation angle for the given block and resets its position.
+        /// </summary>
+        /// <param name="rect"></param>
+        /// <param name="arr"></param>
         private void ChooseBlock(Rectangle[] rect, int arr)
         {
             int shape = rand.Next(0, 7);
@@ -78,11 +83,10 @@ namespace Tetris.GUI
 
             int randX = RandX();
             rainBlockPos[arr, 0] = randX; // set to rand x
-
-
-            for (int l = 0; l < 10; l++)
+            for (int l = 0; l < 10; l++) // checks each x position
             {
                 UpdateRectangles(rect, arr);
+                //move any blocks that are off-screen
                 for (int i = 0; i < rect.Length; i++)
                 {
                     if (rect[i].X < 0)
@@ -103,12 +107,14 @@ namespace Tetris.GUI
 
             for (int i = 0; i < rect.Length; i++)
             {
+                //set the rain block to the new block
                 rainBlocks[arr, i] = rect[i];
             }
         }
 
         private bool DoesBlockExistHere(int x, int y, int arr)
         {
+            //pretty self-explanatory, checks to see if any rain blocks collide with the checked block
             Rectangle[] rect = new Rectangle[4];
             for (int g = 0; g < rect.Length; g++)
             {
@@ -129,6 +135,13 @@ namespace Tetris.GUI
             return false;
         }
 
+        /// <summary>
+        /// Checks for a y position for the block to spawn at that will not interfere with other blocks.
+        /// </summary>
+        /// <param name="x">Blocks x-pos</param>
+        /// <param name="y">Blocks y-pos</param>
+        /// <param name="arr">Blocks array index</param>
+        /// <returns>Safe y-position to spawn at</returns>
         private int FindY(int x,int y,int arr)
         {
             for (int i = 0; i < 20; i++)
@@ -150,6 +163,7 @@ namespace Tetris.GUI
         
         private int RandX()
         {
+            //makes the x position a bit more randomized
             List<int> positions = new List<int>();
             for(int i = 0; i < 10; i++)
                 positions.Add(i*32);
@@ -160,6 +174,9 @@ namespace Tetris.GUI
             return positions[randX];
         }
 
+        /// <summary>
+        /// Finds any blocks that are no longer shown on screen to reuse for the rain.
+        /// </summary>
         private void SearchForBlock()
         {
             for (int i = 0; i < rainBlocks.GetLength(0); i++)
@@ -167,13 +184,14 @@ namespace Tetris.GUI
                 int found = 0;
                 for (int f = 0; f < rainBlocks.GetLength(1); f++)
                 {
-                    if (rainBlocks[i, f].Y > Globals.MaxY + 32)
+                    if (rainBlocks[i, f].Y > Globals.MaxY) // no longer on screen
                     {
                         found++;
                         if (found != 4)
                             continue;
                     }
 
+                    //if the whole tetris block is off screen
                     if (found == 4)
                     {
                         Rectangle[] pieces =
@@ -189,41 +207,52 @@ namespace Tetris.GUI
             }
         }
 
-        private void Gravity()
+        private void Gravity(GameTime gameTime)
         {
-            for (int i = 0; i < rainBlocks.GetLength(0); i++)
+            gravity -= gameTime.ElapsedGameTime.Milliseconds;
+
+            if (gravity <= 0)
             {
-                for (int f = 0; f < rainBlocks.GetLength(1); f++)
+                for (int i = 0; i < rainBlocks.GetLength(0); i++)
                 {
-                    rainBlocks[i, f].Y += 1;
+                    for (int f = 0; f < rainBlocks.GetLength(1); f++)
+                    {
+                        rainBlocks[i, f].Y += 32;
+                    }
                 }
+
+                gravity = 500;
             }
         }
 
-        public void DrawRain(SpriteBatch spriteBatch, GameTime gameTime)
+        public void UpdateRain(GameTime gameTime)
         {
-            
-            if (FadeTime < 0.8f)
+            //Fade timer when menu is shown
+            if (FadeTime < 1f)
             {
                 FadeTime += 0.04f;
             }
             
-            waitTime -= gameTime.ElapsedGameTime.Milliseconds;
+            Gravity(gameTime);
             
-            for (int i = 0; i < rainBlocks.GetLength(0); i++)
-            {
-                for (int f = 0; f < rainBlocks.GetLength(1); f++)
-                {
-                    spriteBatch.Draw(Globals.BlockTexture[rainBlockImage[i]], rainBlocks[i, f], Color.White * FadeTime);
-                }
-            }
+            waitTime -= gameTime.ElapsedGameTime.Milliseconds;
 
             if (waitTime <= 0)
             {
                 SearchForBlock();
             }
-            
-            Gravity();
+        }
+        
+        public void DrawRain(SpriteBatch spriteBatch, GameTime gameTime)
+        {
+            //Draw the rain!
+            for (int i = 0; i < rainBlocks.GetLength(0); i++)
+            {
+                for (int f = 0; f < rainBlocks.GetLength(1); f++)
+                {
+                    spriteBatch.Draw(Globals.BlockTexture[rainBlockImage[i]], rainBlocks[i, f], Color.Lerp(Color.White, Color.Black, 0.3f) * FadeTime);
+                }
+            }
             
         }
     }

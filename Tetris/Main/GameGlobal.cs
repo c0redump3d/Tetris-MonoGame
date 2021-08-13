@@ -15,12 +15,30 @@ namespace Tetris.Main
         /// 0 - Main Menu, 1 - In-Game, 2 - Game Over
         /// </summary>
         public int CurrentScreen { get; set; }
+
         public bool ScreenShake { get; set; }
         public double ShakeStart { get; set; }
         public bool Winner { get; set; }
         public bool Sender { get; set; }
         private bool Started { get; set; }
         public bool IsCountdown { get; set; }
+
+        public string[] GameModes { get; } = new string[]
+        {
+            "Survival",
+            "Time Trial",
+            "40 Line",
+            "Hardcore"
+        };
+        public string[] GameModeObjective { get; } = new string[]
+        {
+            "Survive as long as possible!",
+            "Clear as many lines as\npossible in 3 minutes!",
+            "Race to clear 40 lines!",
+            "     Survive and get as many\ntetrises and t-spins as possible!"
+        };
+
+        public int CurrentMode { get; set; }
 
         public GameGlobal()
         {
@@ -35,7 +53,7 @@ namespace Tetris.Main
             //If the level selected is higher than ten, limit it to 8 rows generated to make it more fair.
             int rowsToGenerate = Instance.GetScoreHandler().Level > 10 ? 8 : Instance.GetScoreHandler().Level - 3;
             
-            if (Instance.GetScoreHandler().Level > 6)
+            if (Instance.GetScoreHandler().Level > 3 && CurrentMode == 3)
                 Instance.GetPlayer().RandomBlock(rowsToGenerate);
         }
         
