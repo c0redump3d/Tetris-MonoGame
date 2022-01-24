@@ -2,169 +2,240 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Xml;
+using System.Xml.Serialization;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using Tetris.Other;
+using Tetris.Game.Managers;
+using Tetris.GUI.DebugMenu;
+using Tetris.GUI.UiColor;
 
 namespace Tetris.Settings
 {
     public class GameSettings
     {
-        //TODO: Add hold button and counterclockwise rotate
-        
+        public List<GameOption<Keys>> KeybindSettings = new();
+        public List<GameOption<bool>> ToggleSettings = new();
+        public List<GameOption<float>> SliderSettings = new();
+        public List<GameOption<Color>> ColorSettings = new();
         private readonly string appData; // appdata location
-
+        private string GetSettingsFile() => appData + @"\Tetris\settings.xml";
+        
         public GameSettings()
         {
             appData = GetLocalAppDataFolder();
-            try
-            {
-                if(!CreateSettingsFile())
-                    LoadSettings();
-            }catch(Exception)
-            {
-                File.Delete(appData + @"\TetrisGame\settings.tet");
-                CreateSettingsFile();
-            }
-
+            RegisterSettings();
+            Load();
         }
 
-        string GetLocalAppDataFolder() {
+        private void RegisterSettings()
+        {
+            KeybindSettings = new();
+            ToggleSettings = new();
+            SliderSettings = new();
+            ColorSettings = new();
+            KeybindSettings.Add(new GameOption<Keys>("Left", Keys.A));
+            KeybindSettings.Add(new GameOption<Keys>("Right", Keys.D));
+            KeybindSettings.Add(new GameOption<Keys>("Down", Keys.S));
+            KeybindSettings.Add(new GameOption<Keys>("RotateRight", Keys.X));
+            KeybindSettings.Add(new GameOption<Keys>("RotateLeft", Keys.Z));
+            KeybindSettings.Add(new GameOption<Keys>("HardDrop", Keys.Space));
+            KeybindSettings.Add(new GameOption<Keys>("Hold", Keys.LeftShift));
+            ToggleSettings.Add(new GameOption<bool>("Music", true));
+            SliderSettings.Add(new GameOption<float>("Volume", 0.1f));
+            ToggleSettings.Add(new GameOption<bool>("Fullscreen", false));
+            foreach(KeyValuePair<string, Color> control in ColorManager.Instance.GuiColor)
+                ColorSettings.Add(new GameOption<Color>(control.Key, control.Value));
+        }
+        
+        private string GetLocalAppDataFolder()
+        {
+            #if __IOS__
+            return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            #endif
+            
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
                 return Environment.GetEnvironmentVariable("LOCALAPPDATA");
-            }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                return Environment.GetEnvironmentVariable("XDG_DATA_HOME") ?? Path.Combine(Environment.GetEnvironmentVariable("HOME"),".local","share");
-            } 
+                return Environment.GetEnvironmentVariable("XDG_DATA_HOME") ??
+                       Path.Combine(Environment.GetEnvironmentVariable("HOME"), ".local", "share");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
                 return Path.Combine(Environment.GetEnvironmentVariable("HOME"), "Library", "Application Support");
-            }
+            
             throw new NotImplementedException("Unknown OS Platform");
         }
         
-        private bool CreateSettingsFile()
+        private bool DoesFileExist()
         {
-            if (File.Exists(appData + @"\TetrisGame\settings.tet"))
-                return false;
-
-            new MovementKeys(Keys.A, Keys.D, Keys.S, Keys.X, Keys.Z, Keys.Space, Keys.LeftShift);
-            new AudioSettings(50, 1);
-
-            if (!Directory.Exists(appData + @"\TetrisGame\"))
-                Directory.CreateDirectory(appData + @"\TetrisGame\");
-
-            var settingsFile = File.Create(appData + @"\TetrisGame\settings.tet");
-
-            settingsFile.Close();
-
-            SaveSettings();
-
-            return true;
+            if (File.Exists(appData + @"\Tetris\settings.xml"))
+                return true;
+            
+            return false;
         }
 
-        public void SaveSettings()
+        private void Load()
         {
-            using(StreamWriter sw = new StreamWriter(appData + @"\TetrisGame\settings.tet"))
+            if (!DoesFileExist())
+                Save();
+            try
             {
-                foreach(KeyValuePair<string, Keys> con in MovementKeys.CONTROLS)
+                using (var sr = new XmlTextReader(new FileStream(GetSettingsFile(), FileMode.Open)))
                 {
-                    sw.WriteLine(con.Key + ":" + con.Value);
-                }
-                foreach (KeyValuePair<string, int> audio in AudioSettings.AUDIO)
-                {
-                    sw.WriteLine(audio.Key + ":" + audio.Value);
+                    List<GameOption<Keys>> check1;
+                    List<GameOption<bool>> check2;
+                    List<GameOption<float>> check3;
+                    List<GameOption<Color>> check4;
+                    Type[] extraTypes = new Type[4]
+                    {
+                        typeof(List<GameOption<Keys>>), typeof(List<GameOption<bool>>), typeof(List<GameOption<float>>), typeof(List<GameOption<Color>>)
+                    };
+                    XmlSerializer serializer = new XmlSerializer(typeof(List<object>), null, extraTypes,
+                        new XmlRootAttribute("Options"), string.Empty);
+                    List<object> list = new List<object>();
+                    list = (List<object>) serializer.Deserialize(sr);
+                    check1 = (List<GameOption<Keys>>) list[0];
+                    check2 = (List<GameOption<bool>>) list[1];
+                    check3 = (List<GameOption<float>>) list[2];
+                    check4 = (List<GameOption<Color>>) list[3];
+                    
+                    if (check1.Count != KeybindSettings.Count || check2.Count != ToggleSettings.Count ||
+                        check3.Count != SliderSettings.Count || check4.Count != ColorSettings.Count) // if file is corrupted or does not match updated settings file
+                    {
+                        throw new Exception("Deserialized list does not match count of local settings!");
+                    }
+
+                    KeybindSettings = check1;
+                    ToggleSettings = check2;
+                    SliderSettings = check3;
+                    ColorSettings = check4;
                 }
             }
-            Instance.GetGuiDebug().DebugMessage("Successfully saved settings file.");
+            catch (Exception)
+            {
+                //Reset the file if exception is raised..
+                File.Delete(GetSettingsFile());
+            }
+
+            Save();
         }
 
-        private void LoadSettings()
+        public void Reset()
         {
-            //Reads settings file and sets keys and audio
-            int count = 0;
-            Dictionary<string, Keys> keys = new Dictionary<string, Keys>();
-            Dictionary<string, int> audio = new Dictionary<string, int>();
-            using (StreamReader sr = new StreamReader(appData + @"\TetrisGame\settings.tet"))
+            RegisterSettings();
+            File.Delete(GetSettingsFile());
+            Load();
+        }
+        
+        public void Save()
+        {
+            if (!Directory.Exists(appData + @"\Tetris"))
+                Directory.CreateDirectory(appData + @"\Tetris");
+            // Overrides the file if it alreadt exists
+            using (var sw = new StreamWriter(new FileStream(GetSettingsFile(), FileMode.Create)))
             {
-                string val;
-                while((val = sr.ReadLine()) != null)
+                Type[] extraTypes = new Type[4] { typeof(List<GameOption<Keys>>), typeof(List<GameOption<bool>>), typeof(List<GameOption<float>>), typeof(List<GameOption<Color>>) };
+                XmlSerializer serializer = new XmlSerializer(typeof(List<object>), null, extraTypes, new XmlRootAttribute("Options"), string.Empty);
+                List<object> list = new List<object>();
+                list.Add(KeybindSettings);
+                list.Add(ToggleSettings);
+                list.Add(SliderSettings);
+                list.Add(ColorSettings);
+                serializer.Serialize(sw, list);
+            }
+            DebugConsole.Instance.AddMessage("Successfully saved settings file.");
+        }
+        
+        public void ChangeKeybind(string name, Keys value)
+        {
+            foreach (GameOption<Keys> option in KeybindSettings)
+            {
+                if (option.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
                 {
-                    string[] data = val.Split(':');
-                    if (count < 7)
-                    {
-                        keys.Add(data[0], (Keys)Enum.Parse(typeof(Keys), data[1]));
-                        count++;
-                    }
-                    else
-                    {
-                        audio.Add(data[0], int.Parse(data[1]));
-                    }
+                    option.SetValue(value);
+                }
+            }
+        }
+        
+        public void ChangeToggle(string name, bool value)
+        {
+            foreach (GameOption<bool> option in ToggleSettings)
+            {
+                if (option.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    option.SetValue(value);
+                }
+            }
+        }
+        
+        public void ChangeSlider(string name, float value)
+        {
+            foreach (GameOption<float> option in SliderSettings)
+            {
+                if (option.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    option.SetValue(value);
+                }
+            }
+        }
+        
+        public void ChangeColor(string name, Color col)
+        {
+            foreach (GameOption<Color> option in ColorSettings)
+            {
+                if (option.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    option.SetValue(col);
+                }
+            }
+        }
+
+        public object GetOptionValue(string name)
+        {
+            foreach (GameOption<Keys> option in KeybindSettings)
+            {
+                if (option.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return option.GetValue();
+                }
+            }
+            foreach (GameOption<bool> option in ToggleSettings)
+            {
+                if (option.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return option.GetValue();
+                }
+            }
+            foreach (GameOption<float> option in SliderSettings)
+            {
+                if (option.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return option.GetValue();
+                }
+            }
+            foreach (GameOption<Color> option in ColorSettings)
+            {
+                if (option.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return option.GetValue();
                 }
             }
 
-            new MovementKeys(keys["Left"], keys["Right"], keys["Down"], keys["RotateRight"], keys["RotateLeft"], keys["Forcedrop"], keys["Hold"]);
-            new AudioSettings(audio["Volume"], audio["Music"]);
-
+            return false;
         }
 
-    }
-
-    public struct MovementKeys
-    {
-        public static Keys LEFT;
-        public static Keys RIGHT;
-        public static Keys DOWN;
-        public static Keys ROTATERIGHT;
-        public static Keys ROTATELEFT;
-        public static Keys FORCEDROP;
-        public static Keys HOLD;
-        public static readonly Dictionary<string, Keys> CONTROLS = new Dictionary<string, Keys>();
-
-        public MovementKeys(Keys left, Keys right, Keys down, Keys rotateright, Keys rotateleft, Keys forcedrop, Keys hold)
+        private static GameSettings _instance;
+        public static GameSettings Instance
         {
-            LEFT = left;
-            RIGHT = right;
-            DOWN = down;
-            ROTATERIGHT = rotateright;
-            ROTATELEFT = rotateleft;
-            FORCEDROP = forcedrop;
-            HOLD = hold;
-            createDic();
-        }
+            get
+            {
+                var result = _instance;
+                if (result == null)
+                {
+                    result = _instance ??= new GameSettings();
+                }
 
-        private void createDic()
-        {
-            CONTROLS.Clear();
-            CONTROLS.Add("Left", LEFT);
-            CONTROLS.Add("Right", RIGHT);
-            CONTROLS.Add("Down", DOWN);
-            CONTROLS.Add("RotateRight", ROTATERIGHT);
-            CONTROLS.Add("RotateLeft", ROTATELEFT);
-            CONTROLS.Add("Forcedrop", FORCEDROP);
-            CONTROLS.Add("Hold", HOLD);
-        }
-    }
-
-    public struct AudioSettings
-    {
-        public static int VOL;
-        public static int MUSIC;
-        public static readonly Dictionary<string, int> AUDIO = new Dictionary<string, int>();
-
-        public AudioSettings(int volume, int music)
-        {
-            VOL = volume;
-            MUSIC = music;
-            createDic();
-        }
-
-        private void createDic()
-        {
-            AUDIO.Clear();
-            AUDIO.Add("Volume", VOL);
-            AUDIO.Add("Music", MUSIC);
+                return result;
+            }
         }
     }
 }

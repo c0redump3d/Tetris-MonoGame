@@ -1,15 +1,14 @@
 ﻿using System;
-using Tetris.Main;
+using Tetris.Game.Managers;
 
 namespace Tetris
 {
     public static class Program
     {
         [STAThread]
-        static void Main()
+        private static void Main()
         {
-            using (var game = new TetrisGame())
-                game.Run();
+            GameManager.Instance.RunGame();
         }
     }
 }
