@@ -5,6 +5,10 @@ namespace Tetris.Game.Player
 {
     public class Rotate
     {
+        /// <summary>
+        /// This contains all position offsets for each tetris block.
+        /// All values are multiplied by the block size(in this case 32)
+        /// </summary>
         public readonly int[,,] Blocks =
         {
             {{1, 0, 1, 0, 1, 0}, {1, 0, 0, -1, 1, 0}, {1, 0, 1, 0, -1, 0}, {-1, 0, 0, 1, -1, 0}}, // t block
@@ -22,8 +26,6 @@ namespace Tetris.Game.Player
         private int rotationAng; // 0 default
         private readonly RotateCheck rotCheck = RotateCheck.Instance;
         private int timesRotated;
-
-        //{ { 1,0,1,0,0,2 }, { 0,2,0,-1,1,0 }, { 1,0,1,0,0,2 }, { 0,2,0,-1,1,0 } }, // i block
 
         public void RotatePiece(bool clockwise)
         {
@@ -93,7 +95,8 @@ namespace Tetris.Game.Player
         {
             rotCheck.SetAllPositions(); // set the position of the rotation check
             RotatePiece(clockwise);
-            rotCheck.UpdateCheck(clockwise); // make sure we are able to do this with breaking stuff
+            //Collision check the newly rotated block.
+            rotCheck.UpdateCheck(clockwise);
             NetworkManager.Instance.SendPacket(5);
         }
 

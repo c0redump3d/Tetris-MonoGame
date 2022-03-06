@@ -102,7 +102,7 @@ namespace Tetris.Game.Player
                 if (ConfirmTime > 0 || PlyY < -112)
                     return;
                 var tSpin = false;
-                if (Rotate.Instance.GetCurShape() == 1) // if we are a tblock, check to see if we did a tspin
+                if (Rotate.Instance.GetCurShape() == 1) // if we are a t-block, check to see if we did a t-spin
                     tSpin = RotateCheck.Instance.TSpinLock();
 
                 //we duplicate the four player rectangles pos

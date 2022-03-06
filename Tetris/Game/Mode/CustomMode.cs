@@ -32,6 +32,9 @@ namespace Tetris.Game.Mode
             Objective = objective;
         }
 
+        //TODO: Implement a proper EventHandling system.
+        //Ideally later it would be better to implement a proper event system.
+        
         public virtual void OnGameStart()
         {
             ShowPinch = false;

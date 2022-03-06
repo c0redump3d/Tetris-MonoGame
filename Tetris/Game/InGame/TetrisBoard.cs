@@ -22,6 +22,8 @@ namespace Tetris.Game.InGame
     /// </summary>
     public class TetrisBoard
     {
+        //Very happy with the newly refactored version of this class :).
+        
         public int[,] Board = new int[22, 10];
         private int greyLines;
         private List<BlockAnimator> laser = new();
@@ -30,6 +32,9 @@ namespace Tetris.Game.InGame
         private int totalLines;
         private int yLev = -48;
 
+        /// <summary>
+        /// Adds a specific block to the given position.
+        /// </summary>
         public void AddBlockToBoard(int shape, int x, int y)
         {
             for (var i = 0; i < 22; i++)
@@ -51,6 +56,9 @@ namespace Tetris.Game.InGame
             }
         }
 
+        /// <summary>
+        /// Checks each row to see if the current row is full and if so, it is added to a list to be removed.
+        /// </summary>
         public void UpdateRows()
         {
             totalLines = 0;
@@ -80,6 +88,9 @@ namespace Tetris.Game.InGame
             yLev = -48;
         }
 
+        /// <summary>
+        /// After blocks have been removed from the array, move all remaining rows down(No empty rows in-between)
+        /// </summary>
         private void Fall()
         {
             var gameBoardTempRow = Board.GetLength(0) - 1;
@@ -102,6 +113,9 @@ namespace Tetris.Game.InGame
                 Board[row, col] = gameBoardTemp[row, col]; // now copy temp to board for updated array
         }
 
+        /// <summary>
+        /// Forces board to move down(NOT the same as Fall())
+        /// </summary>
         public void MoveDown()
         {
             for (var i = Board.GetLength(0) - 1; i > 0; i--)
@@ -115,6 +129,9 @@ namespace Tetris.Game.InGame
             }
         }
 
+        /// <summary>
+        /// Forces board to move up(used to add a new row to bottom of board(RandomRow))
+        /// </summary>
         public void MoveUp()
         {
             for (var i = 0; i < Board.GetLength(0); i++)
@@ -128,6 +145,9 @@ namespace Tetris.Game.InGame
             }
         }
 
+        /// <summary>
+        /// Checks if the Y-position of the block would collide with placed blocks.
+        /// </summary>
         public bool WouldCollide(Rectangle[] rects, bool noChange = false)
         {
             for (var i = 0; i < Board.GetLength(0); i++)
@@ -144,6 +164,9 @@ namespace Tetris.Game.InGame
             return false;
         }
 
+        /// <summary>
+        /// Checks if the X-position of the block would collide with the game board or another placed block.
+        /// </summary>
         public bool WouldCollideLR(Rectangle[] rects, bool left)
         {
             for (var i = 0; i < Board.GetLength(0); i++)
@@ -152,13 +175,27 @@ namespace Tetris.Game.InGame
                 var rect = new Rectangle(f * 32 + (left ? 32 : -32), i * 32 + Globals.LowestY, 32, 32);
 
                 for (var l = 0; l < rects.Length; l++)
+                {
                     if (rect.Intersects(rects[l]) && Board[i, f] != 0)
                         return true;
+                }
+            }
+            
+            //If we collide with side of board.
+            for (var l = 0; l < rects.Length; l++)
+            {
+                if (rects[l].X >= 288 && !left)
+                    return true;
+                if (rects[l].X <= 0 && left)
+                    return true;
             }
 
             return false;
         }
 
+        /// <summary>
+        /// Removes all rows added to the rowsToRemove array.
+        /// </summary>
         private void RemoveFullRows()
         {
             if (rowsToRemove.Count <= 0)
@@ -197,6 +234,8 @@ namespace Tetris.Game.InGame
             TimerUtil.Instance.CreateTimer(700, FallDown, "falltime");
         }
 
+        //TODO: Why is this in TetrisBoard and not BlockAnimator?
+        
         public void UpdateLasers(GameTime gameTime)
         {
             if (laser.Count <= 0)

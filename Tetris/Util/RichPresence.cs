@@ -1,8 +1,6 @@
 ﻿
-#if !__IOS__
 using DiscordRPC;
 using DiscordRPC.Logging;
-#endif
 using Tetris.Game.InGame;
 using Tetris.Game.Managers;
 using Tetris.Game.Mode;
@@ -13,17 +11,13 @@ namespace Tetris.Util
     public class RichPresence
     {
         
-#if !__IOS__
         private readonly DiscordRpcClient client;
         private int currentScreen = -1;
-#endif
 
         private RichPresence()
         {
-            #if !__IOS__
             client = new DiscordRpcClient("873719171211485224") {Logger = new ConsoleLogger {Level = LogLevel.Warning}};
             client.Initialize();
-            #endif
         }
 
         /// <summary>
@@ -31,27 +25,22 @@ namespace Tetris.Util
         /// </summary>
         public void UpdatePresence()
         {
-#if !__IOS__
             var status = InGameManager.Instance.GameOver ? "Game Over" :
                 InGameManager.Instance.Paused ? "Paused" :
                 $"{ModeManager.Instance.GetCurrentMode().Name}";
             client.UpdateDetails($"{status} | Level {ScoreHandler.Instance.Level}");
             client.UpdateState(
                 $"Score - {ScoreHandler.Instance.Score:n0} | Lines - {ScoreHandler.Instance.TotalLines}");
-#endif
         }
 
         public void Shutdown()
         {
-#if !__IOS__
             client.Deinitialize();
             client.Dispose();
-#endif
         }
 
         public void SetPresence(int screen)
         {
-#if !__IOS__
             if (currentScreen == screen)
                 return;
 
@@ -83,7 +72,6 @@ namespace Tetris.Util
 
             DebugConsole.Instance.AddMessage($"Successfully set discord presence to menu {screen}.");
             currentScreen = screen;
-#endif
         }
 
         private static RichPresence _instance;

@@ -24,7 +24,7 @@ namespace Tetris.GUI.Screens.ScreenAnimations
         }
         
         /// <summary>
-        /// Moves the star images accros the screen. Also checks to see if any images are currently offscreen.
+        /// Moves the star images across the screen. Also checks to see if any images are currently offscreen.
         /// </summary>
         public void UpdateStarBG()
         {
@@ -40,6 +40,7 @@ namespace Tetris.GUI.Screens.ScreenAnimations
                     bgPositions[i].X = lowestX - starBackgrounds[0].Width;
                     break;
                 }
+                //This controls the speed of scrolling. Found 0.3 to be a fairly nice speed.
                 bgPositions[i].X += 0.3f;
             }
         }

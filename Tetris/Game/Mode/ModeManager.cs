@@ -28,8 +28,13 @@ namespace Tetris.Game.Mode
             GameModes.Add(new TimeTrial("Time Trial", "Clear as many lines as\npossible in 3 minutes!"));
             GameModes.Add(new LineGoal("40 Line", "Race to clear 40 lines!"));
             GameModes.Add(new Hardcore("Hardcore", "     Survive and get as many\ntetrises and t-spins as possible!"));
+            GameModes.Add(new Challenge("Challenge", "   Complete the given challenge\nor be punished if you're too slow!"));
         }
 
+        /// <summary>
+        /// Sets the game mode to the provided input.
+        /// </summary>
+        /// <param name="name">Name of game mode</param>
         public void SetCurrentMode(string name)
         {
             foreach (CustomMode mode in GameModes)

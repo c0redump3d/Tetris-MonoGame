@@ -13,6 +13,11 @@ namespace Tetris.Game
 {
     public class TetrisGame : Microsoft.Xna.Framework.Game
     {
+        
+        /*
+         * TODO: Try and fix retina display issues(ex: Mac retina screens are rendered at native resolution instead of retina resolution)
+         * Not sure if this affects Win HDPI either, it shouldn't as app.manifest specifies support for the feature.
+         */
 
         public readonly GraphicsDeviceManager Graphics;
         private SpriteBatch screenBatch;
@@ -25,6 +30,8 @@ namespace Tetris.Game
         private TetrisGame()
         {
             Graphics = new GraphicsDeviceManager(this);
+            Graphics.GraphicsProfile = GraphicsProfile.HiDef;
+            Graphics.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
@@ -35,12 +42,13 @@ namespace Tetris.Game
             Graphics.PreferredBackBufferWidth = 1280;
             Graphics.PreferredBackBufferHeight = 720;
             Graphics.PreferMultiSampling = true;
-            Graphics.HardwareModeSwitch = false;
+            Graphics.HardwareModeSwitch = true;
             Graphics.ApplyChanges();
             Window.AllowUserResizing = true;
             Window.ClientSizeChanged += OnResize;
             targetBatch = new SpriteBatch(GraphicsDevice);
             target = new RenderTarget2D(GraphicsDevice, 1280, 720);
+            
             Window.Title = $"Tetris ({Globals.Version})";
 
             TetrisRain.Instance.SetUp();
@@ -98,8 +106,9 @@ namespace Tetris.Game
 
             //set rendering back to the back buffer
             GraphicsDevice.SetRenderTarget(null);
-            //render target to back buffer
-            targetBatch.Begin(samplerState: SamplerState.PointClamp);
+            //render target to back buffer(Scales previous target to current window resolution)
+            //Point clamp is so far the best sampler I could find, not perfect though(especially with weird resolutions)
+            targetBatch.Begin(samplerState: SamplerState.PointClamp); 
             targetBatch.Draw(target,
                 new Rectangle(0, 0, Graphics.PreferredBackBufferWidth, Graphics.PreferredBackBufferHeight),
                 Color.White);

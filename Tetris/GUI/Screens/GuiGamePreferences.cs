@@ -4,7 +4,7 @@ using Tetris.Game;
 using Tetris.Game.InGame;
 using Tetris.Game.Managers;
 using Tetris.Game.Mode;
-using Tetris.GUI.Elements;
+using Tetris.GUI.Control.Controls;
 using Tetris.Multiplayer.Network;
 using Tetris.Util;
 
@@ -15,18 +15,18 @@ namespace Tetris.GUI.Screens
         public override void SetUp()
         {
             base.SetUp();
-            Buttons.Add(new Button(1, new Vector2(840, 265), ">", Globals.Hoog48, false));
-            Buttons.Add(new Button(2, new Vector2(440, 265), "<", Globals.Hoog48, false));
-            Buttons.Add(new Button(3, new Vector2(840, 365), ">", Globals.Hoog48, false));
-            Buttons.Add(new Button(4, new Vector2(440, 365), "<", Globals.Hoog48, false));
-            Buttons.Add(new Button(5, new Vector2(640, 510), "Start", Globals.Hoog48));
-            Buttons.Add(new Button(6, new Vector2(640, 610), "Back", Globals.Hoog48));
-            Buttons[0].OnClick += LevelRight;
-            Buttons[1].OnClick += LevelLeft;
-            Buttons[2].OnClick += ModeRight;
-            Buttons[3].OnClick += ModeLeft;
-            Buttons[4].OnClick += Start;
-            Buttons[5].OnClick += s => Gui.SetCurrentScreen(new GuiMainMenu());
+            AddControl(new Button(new Vector2(840, 265), ">", Globals.Hoog48, false));
+            AddControl(new Button(new Vector2(440, 265), "<", Globals.Hoog48, false));
+            AddControl(new Button(new Vector2(840, 365), ">", Globals.Hoog48, false));
+            AddControl(new Button(new Vector2(440, 365), "<", Globals.Hoog48, false));
+            AddControl(new Button( new Vector2(640, 510), "Start", Globals.Hoog48));
+            AddControl(new Button( new Vector2(640, 610), "Back", Globals.Hoog48));
+            ((Button)GetControlFromType(typeof(Button), 0)).OnClick += LevelRight;
+            ((Button)GetControlFromType(typeof(Button), 1)).OnClick += LevelLeft;
+            ((Button)GetControlFromType(typeof(Button), 2)).OnClick += ModeRight;
+            ((Button)GetControlFromType(typeof(Button), 3)).OnClick += ModeLeft;
+            ((Button)GetControlFromType(typeof(Button), 4)).OnClick += Start;
+            ((Button)GetControlFromType(typeof(Button), 5)).OnClick += s => Gui.SetCurrentScreen(new GuiMainMenu());
             ButtonsDrawn = true;
         }
 
@@ -51,7 +51,11 @@ namespace Tetris.GUI.Screens
                 $"{ModeManager.Instance.GetCurrentMode().Objective}", new Vector2(640, 160),
                 Color.White * Opacity);
 
-            foreach (var but in Buttons) but.Draw(spriteBatch, Color.White);
+            foreach (var con in Controls)
+            {
+                if (con.GetType() == typeof(Button))
+                    ((Button)con).Draw(spriteBatch, Color.White);
+            }
             spriteBatch.End();
         }
 

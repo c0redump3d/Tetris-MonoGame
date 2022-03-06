@@ -19,6 +19,7 @@ namespace Tetris.GUI.Particle
         {
             foreach (var particle in activeParticles.ToList())
             {
+                //If the particle is considered 'dead' remove it from particle list.
                 if (!particle.Alive) activeParticles.Remove(particle);
                 particle.Update(gameTime);
             }
@@ -26,6 +27,7 @@ namespace Tetris.GUI.Particle
 
         public void DrawParticles(SpriteBatch spriteBatch)
         {
+            //Draws particles relative to the in-game board.
             spriteBatch.Begin(transformMatrix: Matrix.CreateTranslation(new Vector3(NetworkManager.Instance.Connected ? 279 : 480, 32, 0)));
             foreach (var particle in activeParticles.ToList()) particle.DrawParticle(spriteBatch);
             spriteBatch.End();

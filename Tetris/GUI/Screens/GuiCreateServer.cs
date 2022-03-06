@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Tetris.Game;
-using Tetris.GUI.Elements;
+using Tetris.GUI.Control.Controls;
 using Tetris.Multiplayer.Network;
 using Tetris.Util;
 
@@ -17,12 +17,12 @@ namespace Tetris.GUI.Screens
         {
             base.SetUp();
             bool running = NetworkManager.Instance.IsServer();
-            Buttons.Add(new Button(0, new Vector2(640, 510), running ? "Stop Server" : "Start Server", Globals.Hoog48));
-            Buttons.Add(new Button(1, new Vector2(640, 610), "Back", Globals.Hoog48));
-            Buttons[0].OnClick += TryConnect;
-            Buttons[1].OnClick += MenuClick;
-            TextBoxes.Add(new(400, 250, "9050", 5, @"^[0-9]*$"));
-            TextBoxes.Add(new(400, 350, "Password", 15));
+            AddControl(new Button(new Vector2(640, 510), running ? "Stop Server" : "Start Server", Globals.Hoog48));
+            AddControl(new Button(new Vector2(640, 610), "Back", Globals.Hoog48));
+            ((Button)GetControlFromType(typeof(Button),0)).OnClick += TryConnect;
+            ((Button)GetControlFromType(typeof(Button),1)).OnClick += MenuClick;
+            AddControl(new TextBox(400, 250, "9050", 5, @"^[0-9]*$"));
+            AddControl(new TextBox(400, 350, "Password", 15));
             ButtonsDrawn = true;
             if (running)
             {
@@ -41,14 +41,14 @@ namespace Tetris.GUI.Screens
             {
                 if (!running)
                 {
-                    NetworkManager.Instance.StartServer(int.Parse(TextBoxes[0].Text), TextBoxes[1].Text);
-                    Buttons[0].Text = "Stop Server";
+                    NetworkManager.Instance.StartServer(int.Parse(((TextBox)GetControlFromType(typeof(TextBox),0)).Text), ((TextBox)GetControlFromType(typeof(TextBox),1)).Text);
+                    ((Button)GetControlFromType(typeof(Button),0)).Text = "Stop Server";
                     Message = "Server is running";
                 }
                 else
                 {
                     NetworkManager.Instance.StopServer();
-                    Buttons[0].Text = "Start Server";
+                    ((Button)GetControlFromType(typeof(Button),0)).Text = "Start Server";
                     Message = "Server is not running";
                 }
             }
@@ -65,9 +65,6 @@ namespace Tetris.GUI.Screens
 
         public override void Update(GameTime gameTime)
         {
-            TextBoxes[0].Update();
-            TextBoxes[1].Update();
-            foreach (var but in Buttons) but.Update();
             base.Update(gameTime);
         }
 
@@ -77,14 +74,14 @@ namespace Tetris.GUI.Screens
 
             bool running = NetworkManager.Instance.IsServer();
             
-            if (running && Buttons[0].Text != "Stop Server")
+            if (running && ((Button)GetControlFromType(typeof(Button),0)).Text != "Stop Server")
             {
-                Buttons[0].Text = "Stop Server";
+                ((Button)GetControlFromType(typeof(Button),0)).Text = "Stop Server";
             }
-            else if(!running && Buttons[0].Text != "Start Server")
+            else if(!running && ((Button)GetControlFromType(typeof(Button),0)).Text != "Start Server")
             {
-                if(Buttons[0].Text == "Stop Server")
-                    Buttons[0].Text = "Start Server";
+                if(((Button)GetControlFromType(typeof(Button),0)).Text == "Stop Server")
+                    ((Button)GetControlFromType(typeof(Button),0)).Text = "Start Server";
             }
             
             spriteBatch.Begin();
@@ -95,9 +92,10 @@ namespace Tetris.GUI.Screens
             spriteBatch.DrawCenteredString(Globals.Hoog12, Message, new Vector2(640, 135), running ? Color.Green : Color.Gray);
             spriteBatch.DrawStringWithShadow(Globals.Hoog24, "Port:", new Vector2(400, 215), Color.White);
             spriteBatch.DrawStringWithShadow(Globals.Hoog24, "Password:", new Vector2(400, 315), Color.White);
-            TextBoxes[0].Draw(spriteBatch, gameTime);
-            TextBoxes[1].Draw(spriteBatch, gameTime);
-            foreach (var but in Buttons) but.Draw(spriteBatch, Color.White);
+            ((TextBox)GetControlFromType(typeof(TextBox),0)).Draw(spriteBatch, gameTime);
+            ((TextBox)GetControlFromType(typeof(TextBox),1)).Draw(spriteBatch, gameTime);
+            ((Button)GetControlFromType(typeof(Button),0)).Draw(spriteBatch, Color.White);
+            ((Button)GetControlFromType(typeof(Button),1)).Draw(spriteBatch, Color.White);
             spriteBatch.End();
         }
     }

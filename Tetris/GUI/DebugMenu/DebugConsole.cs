@@ -3,11 +3,14 @@ using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Tetris.Game;
-using Tetris.GUI.Elements;
+using Tetris.GUI.Control.Controls;
 using Tetris.Util;
 
 namespace Tetris.GUI.DebugMenu
 {
+    /// <summary>
+    /// Console to help print useful information when developing new features & fixing bugs in-game.
+    /// </summary>
     public class DebugConsole
     {
         

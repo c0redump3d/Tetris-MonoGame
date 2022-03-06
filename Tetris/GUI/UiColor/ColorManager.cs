@@ -6,8 +6,14 @@ using Tetris.Util;
 
 namespace Tetris.GUI.UiColor
 {
+    /// <summary>
+    /// This sets up and allows the user to control all specific color values of the GUI, pretty awesome and allows for lots of customization.
+    /// </summary>
     public class ColorManager
     {
+        /// <summary>
+        /// Takes a string as the key which refers to the GUI element being edited, and the value is the Color value of the GUI element.
+        /// </summary>
         public Dictionary<string, Color> GuiColor;
 
         private ColorManager()

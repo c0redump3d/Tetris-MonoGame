@@ -3,9 +3,11 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Tetris.Game;
+using Tetris.GUI.Control;
+using Tetris.GUI.Control.Controls;
 using Tetris.GUI.DebugMenu;
-using Tetris.GUI.Elements;
 using Tetris.GUI.Particle;
+using Tetris.GUI.UiColor;
 using Tetris.Util;
 
 namespace Tetris.GUI
@@ -25,12 +27,15 @@ namespace Tetris.GUI
         public GuiScreen CurrentScreen;
         //Next screen is used so that we can have a type of transition between the two menus(Fade out old menu, fade in new)
         private GuiScreen NextScreen;
+        public Panel CurrentPanel;
+        public UiColorOption CurrentColorPanel;
         public bool StartUp = true;
 
         public string MultiplayerMessage = "";
 
         public void SetCurrentScreen(GuiScreen screen)
         {
+            //If a screen is already being drawn on-screen we want to use the fade animator.
             if (CurrentScreen != null)
             {
                 NextScreen = screen;
@@ -38,6 +43,7 @@ namespace Tetris.GUI
             }
             else
             {
+                //If no screen had been previously shown, there is no previous menu to set to close.
                 CurrentScreen = screen;
                 CurrentScreen.SetUp();
             }
@@ -70,6 +76,9 @@ namespace Tetris.GUI
             DebugMenu.DebugMenu.Instance.Update(gameTime);
         }
 
+        /// <summary>
+        /// Translates the mouse position of the screen to the virtual resolution of the game(1280x720)
+        /// </summary>
         public Vector2 TranslateMousePosition(MouseState state)
         {
             var virtualX = Convert.ToSingle(state.X) * Convert.ToSingle(1280) / Convert.ToSingle(Globals.ScreenWidth);

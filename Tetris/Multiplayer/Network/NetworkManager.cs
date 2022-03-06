@@ -7,6 +7,9 @@ using Tetris.Util;
 
 namespace Tetris.Multiplayer.Network
 {
+    /// <summary>
+    /// Manages the multiplayer network(connecting, disconnecting, packets, etc.), uses LiteNetLib for networking.
+    /// </summary>
     public class NetworkManager
     {
         private bool runningClient = false;
@@ -45,8 +48,9 @@ namespace Tetris.Multiplayer.Network
             EventBasedNetListener listener = new EventBasedNetListener();
             Client = new NetManager(listener);
             Client.Start();
-            Client.MaxConnectAttempts = 5;
+            Client.MaxConnectAttempts = 5; // ping server 5 times before giving up.
             Client.Connect(ip, port, password);
+            //Event is raised if the client has successfully connected to the server.
             listener.PeerConnectedEvent += peer =>
             {
                 DebugConsole.Instance.AddMessage($"Connected to {peer.EndPoint}");
@@ -99,6 +103,7 @@ namespace Tetris.Multiplayer.Network
         {
             UpdateTime -= gameTime.ElapsedGameTime.Milliseconds;
 
+            //Delay update time to every 15ms, any faster really isn't needed and is easier on network/CPU usage.
             if (UpdateTime < 0f)
             {
                 Client.PollEvents();
@@ -110,6 +115,7 @@ namespace Tetris.Multiplayer.Network
         {
             UpdateTime -= gameTime.ElapsedGameTime.Milliseconds;
 
+            //Again server is only updated every 15ms.
             if (UpdateTime < 0f)
             {
                 Server.PollEvents();
@@ -135,8 +141,9 @@ namespace Tetris.Multiplayer.Network
             runningServer = true;
             EventBasedNetListener listener = new EventBasedNetListener();
             Server = new NetManager(listener);
-            Server.Start(port);
+            Server.Start(port); // starts server with user specified port.
             listener.NetworkReceiveEvent += ReceiveInformation;
+            //Event is raised when a client is attempting to connect on port.
             listener.ConnectionRequestEvent += request =>
             {
                 if(Server.ConnectedPeersCount < 1)
@@ -157,14 +164,16 @@ namespace Tetris.Multiplayer.Network
         
         public void SendInformation(NetDataWriter writer, DeliveryMethod deliveryMethod = DeliveryMethod.ReliableOrdered)
         {
+            //Make sure we are connected first, then send packet data.
             if(Connected)
                 Peer.Send(writer, deliveryMethod);
         }
 
         private void ReceiveInformation(NetPeer peer, NetPacketReader dataReader, DeliveryMethod deliveryMethod)
         {
+            //When we receive a packet, we first pass the packets id so that the correct packet is selected.
             RunPacketFromID(dataReader.GetInt(), dataReader);
-            dataReader.Recycle();
+            dataReader.Recycle(); // the data is no longer needed, remove it from memory.
         }
 
         private static NetworkManager _instance;

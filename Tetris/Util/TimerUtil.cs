@@ -29,6 +29,10 @@ namespace Tetris.Util
         }
     }
 
+    /// <summary>
+    /// Allows for delayed code functionality and other extremely useful features,
+    /// EX: this is used multiple times in the row fall function to allow for a animation to play out before the row actually falls.
+    /// </summary>
     public class TimerUtil
     {
         private static TimerUtil _instance;
@@ -46,6 +50,7 @@ namespace Tetris.Util
             }
         }
 
+        //Allow for multiple timers to be created at once.
         private readonly List<TimerVar> timers = new();
         private int totalID = -1;
 
@@ -61,6 +66,7 @@ namespace Tetris.Util
         /// <param name="runFunc">Function to run after timer has completed (Optional)</param>
         public void CreateTimer(float time, Action runFunc = null, string name = "")
         {
+            //If a timer name is specified, we assume we do not want another of the same timer running concurrently!
             if (!name.Equals(""))
                 foreach (var timer in timers)
                     if (name.Equals(timer.Name) && timer.Time >= 0)
@@ -101,8 +107,9 @@ namespace Tetris.Util
             for (var i = 0; i < timers.Count; i++)
                 if (timers[i].Time >= 0)
                 {
+                    //Raise timer tick event
                     timers[i].OnTick(new EventArgs());
-                    timers[i].Time = timers[i].Time - gameTime.ElapsedGameTime.Milliseconds;
+                    timers[i].Time -= gameTime.ElapsedGameTime.Milliseconds;
                 }
                 else
                 {
@@ -115,6 +122,11 @@ namespace Tetris.Util
                 }
         }
 
+        /// <summary>
+        /// Allows access to a specific timer if name is provided
+        /// </summary>
+        /// <param name="name">Name of timer</param>
+        /// <returns>TimerUtil</returns>
         public TimerVar GetTimer(string name)
         {
             foreach (var timer in timers)

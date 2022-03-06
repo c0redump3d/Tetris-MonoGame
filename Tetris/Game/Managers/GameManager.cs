@@ -13,6 +13,8 @@ namespace Tetris.Game.Managers
     public class GameManager
     {
         
+        //This class is used to draw stuff to the screen when the player is not in game(Any type of menu other than the pause menu)
+        
         public readonly Random Random = new();
         
         public void UpdateAll(GameTime gameTime)

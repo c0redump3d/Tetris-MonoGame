@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended;
 using Tetris.Game;
 using Tetris.GUI;
 
@@ -49,7 +50,9 @@ namespace Tetris.Util
             string text, Vector2 position, Color color, float shadowOpacity = 0.3f, float opacity = 1f)
         {
             var size = spriteFont.MeasureString(text);
-            spriteBatch.DrawStringWithShadow(spriteFont, text, position - size / 2f, color * opacity, shadowOpacity);
+            var pos = position - size / 2f;
+            pos.Round();
+            spriteBatch.DrawStringWithShadow(spriteFont, text, pos, color * opacity, shadowOpacity);
         }
 
         public static void DrawStringWithShadow(this SpriteBatch spriteBatch, SpriteFont font, string text,

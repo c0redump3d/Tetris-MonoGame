@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Tetris.Game;
 using Tetris.Game.Managers;
+using Tetris.GUI.Control.Controls;
 using Tetris.GUI.DebugMenu;
-using Tetris.GUI.Elements;
 using Tetris.GUI.UiColor;
 using Tetris.Util;
 
@@ -20,12 +22,12 @@ namespace Tetris.GUI.Screens
         public override void SetUp()
         {
             base.SetUp();
-            Buttons.Add(new Button(0, new Vector2(300, 620), "Back", Globals.Hoog48));
-            Buttons[0].OnClick += o => Gui.Instance.SetCurrentScreen(new GuiSettings());
-            Buttons.Add(new Button(1, new Vector2(1210,330), "Hide", Globals.Hoog24));
-            Buttons[1].OnClick += ShowHide;
-            TextBoxes.Add(new TextBox(150, 500, "Example textbox", 15, "", 300, 30));
-            Buttons.Add(new Button(1, new Vector2(300, 550), "Example button", Globals.Hoog24));
+            AddControl(new Button(new Vector2(300, 620), "Back", Globals.Hoog48));
+            ((Button)GetControlFromType(typeof(Button), 0)).OnClick += o => Gui.Instance.SetCurrentScreen(new GuiSettings());
+            AddControl(new Button(new Vector2(1210,330), "Hide", Globals.Hoog24));
+            ((Button)GetControlFromType(typeof(Button), 1)).OnClick += ShowHide;
+            AddControl(new Button(new Vector2(300, 550), "Example button", Globals.Hoog24));
+            AddControl(new TextBox(150, 500, "Example textbox", 15, "", 300, 30));
             colorOptions = new List<UiColorOption>();
             int x = 10, y = 10;
             List<string> addedCat = new();
@@ -39,7 +41,7 @@ namespace Tetris.GUI.Screens
                     if (offscreen)
                     {
                         x = 10;
-                        y += 155;
+                        y += option.PanelHeight + 10;
                     }
                     option = new UiColorOption(cat, new Vector2(x, y), 160);
                     colorOptions.Add(option);
@@ -69,15 +71,22 @@ namespace Tetris.GUI.Screens
         
         public override void Update(GameTime gameTime)
         {
+            if (Gui.Instance.CurrentColorPanel != null)
+            {
+                var tempArr = colorOptions;
+                if (tempArr.IndexOf(Gui.Instance.CurrentColorPanel) != 0)
+                {
+                    tempArr.Remove(Gui.Instance.CurrentColorPanel);
+                    tempArr.Insert(0, Gui.Instance.CurrentColorPanel);
+                    colorOptions = tempArr;
+                }
+            }
+
             foreach (UiColorOption option in colorOptions)
             {
                 option.Update(gameTime);
             }
-
-            foreach (TextBox tBox in TextBoxes)
-            {
-                tBox.Update();
-            }
+            
             base.Update(gameTime);
         }
         
@@ -85,14 +94,18 @@ namespace Tetris.GUI.Screens
         {
             base.DrawScreen(spriteBatch, gameTime);
             spriteBatch.Begin();
-            foreach (UiColorOption option in colorOptions)
+            foreach (UiColorOption option in colorOptions.Reverse<UiColorOption>())
             {
                 option.Draw(spriteBatch);
             }
 
-            foreach (var textBox in TextBoxes)
+            foreach (var uiControl in Controls)
             {
-                textBox.Draw(spriteBatch, gameTime);
+                if (uiControl.GetType() == typeof(TextBox))
+                {
+                    var textBox = (TextBox) uiControl;
+                    textBox.Draw(spriteBatch, gameTime);
+                }
             }
             //1265
             var mult = Opacity > 0.5f ? 0.5f : Opacity;
@@ -117,9 +130,13 @@ namespace Tetris.GUI.Screens
                     ColorManager.Instance.GuiColor["Score Text"], 0f, Vector2.Zero, 0.5f, SpriteEffects.None, 0f);
             }
 
-            foreach (Button but in Buttons)
+            foreach (var uiControl in Controls)
             {
-                but.Draw(spriteBatch, Color.White);
+                if (uiControl.GetType() == typeof(Button))
+                {
+                    var but = (Button) uiControl;
+                    but.Draw(spriteBatch, Color.White);
+                }
             }
             spriteBatch.End();
         }

@@ -3,13 +3,12 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Tetris.Game;
-using Tetris.Game.Managers;
 using Tetris.GUI.UiColor;
 using Tetris.Util;
 
-namespace Tetris.GUI.Elements
+namespace Tetris.GUI.Control.Controls
 {
-    public class TextBox
+    public class TextBox : UiControl
     {
         private double cursorTime;
 
@@ -17,72 +16,59 @@ namespace Tetris.GUI.Elements
         private Color ButtonBorderCol = ColorManager.Instance.GuiColor["Text Box Border"];
 
         //This will most likely be changed to be more modular in the future, but for now it gets the job done.
-        private MouseState oldState;
-        private SpriteFont font;
         private int firstClick = 0;
 
-        public TextBox(int x, int y, string defaultText, int maxLength, string textFilter = "", int width = 500, int height = 50)
+        public TextBox(int x, int y, string defaultText, int maxLength, string textFilter = "", int width = 500, int height = 50) : base()
         {
-            Rec = new Rectangle(x, y, width, height);
-            font = width < 500 ? Globals.Hoog12 : Globals.Hoog24;
-            X = x;
-            Y = y;
+            Font = width < 500 ? Globals.Hoog12 : Globals.Hoog24;
+            Position = new Vector2(x, y);
+            Size = new Vector2(width, height);
             DefaultText = defaultText;
             Text = defaultText;
             MaxLength = maxLength;
             if (textFilter != "")
                 TextFilter = textFilter;
         }
-
-        public Rectangle Rec { get; set; }
         public bool Focused { get; set; }
-        public int X { get; set; }
-        public int Y { get; set; }
-        public string Text { get; set; }
         public string DefaultText { get; set; }
         public int MaxLength { get; set; }
         public string TextFilter { get; set; } = @"^[a-zA-Z0-9.\-]*?$";
 
-        public void Update()
+        public override void Update(GameTime gameTime)
         {
-            if (Gui.Instance.CurrentScreen.Closing)
-                return;
             ButtonBackCol = ColorManager.Instance.GuiColor["Text Box Background"];
             ButtonBorderCol = ColorManager.Instance.GuiColor["Text Box Border"];
             var mouseState = Mouse.GetState();
-            var mousePos = Gui.Instance.TranslateMousePosition(mouseState);
-            if (Rec.Contains(new Point((int) mousePos.X, (int) mousePos.Y)))
+            if (mouseState.LeftButton == ButtonState.Pressed &&
+                OldMouseState.LeftButton == ButtonState.Released && !Hover)
             {
-                //Hovering = true;
-                if (mouseState.LeftButton == ButtonState.Pressed &&
-                    oldState.LeftButton == ButtonState.Released)
+                Focused = false;
+                Gui.Instance.CurrentTextBox = null;
+                if (Text == "")
                 {
-                    if (Text == DefaultText && firstClick == 0)
-                    {
-                        Text = "";
-                        firstClick++;
-                    }
-
-                    Gui.Instance.CurrentTextBox = this;
-                    Focused = true;
+                    Text = DefaultText;
+                    firstClick = 0;
                 }
             }
-            else
-            {
-                if (mouseState.LeftButton == ButtonState.Pressed &&
-                    oldState.LeftButton == ButtonState.Released)
-                {
-                    Focused = false;
-                    Gui.Instance.CurrentTextBox = null;
-                    if (Text == "")
-                    {
-                        Text = DefaultText;
-                        firstClick = 0;
-                    }
-                }
-            }
+            base.Update(gameTime);
+        }
 
-            oldState = mouseState;
+        public override void ControlHover(object sender, Vector2 mousePos)
+        {
+            var mouseState = Mouse.GetState();
+            if (mouseState.LeftButton == ButtonState.Pressed &&
+                OldMouseState.LeftButton == ButtonState.Released)
+            {
+                if (Text == DefaultText && firstClick == 0)
+                {
+                    Text = "";
+                    firstClick++;
+                }
+
+                Gui.Instance.CurrentTextBox = this;
+                Focused = true;
+            }
+            base.ControlHover(sender, mousePos);
         }
 
         public void UpdateText(char key)
@@ -104,7 +90,7 @@ namespace Tetris.GUI.Elements
             }
         }
 
-        public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+        public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             var cursor = "";
 
@@ -121,12 +107,13 @@ namespace Tetris.GUI.Elements
             var opacity = Gui.Instance.CurrentScreen.Opacity;
             var mult = opacity > 0.8f ? 0.8f : opacity - 0.2f;
             
-            spriteBatch.DrawBorderedRect(Rec, ButtonBackCol * mult, ButtonBorderCol * opacity);
-            spriteBatch.DrawCenteredString(font, cursor,
-                new Vector2(font.MeasureString(Text + cursor).X / 2 + Rec.Center.X, Rec.Center.Y),
+            spriteBatch.DrawBorderedRect(new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y), ButtonBackCol * mult, ButtonBorderCol * opacity);
+            spriteBatch.DrawCenteredString(Font, cursor,
+                new Vector2(Font.MeasureString(Text + cursor).X / 2 + (Position.X + Size.X/2), (Position.Y + Size.Y/2)),
                 Color.LightGray);
-            spriteBatch.DrawCenteredString(font, Text, new Vector2(Rec.Center.X, Rec.Center.Y),
+            spriteBatch.DrawCenteredString(Font, Text, new Vector2(Position.X + Size.X/2, (Position.Y + Size.Y/2)),
                 Color.LightGray);
+            base.Draw(spriteBatch, gameTime);
         }
     }
 }

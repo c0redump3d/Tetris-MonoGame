@@ -9,6 +9,9 @@ using Tetris.Util;
 
 namespace Tetris.GUI.Animators
 {
+    /// <summary>
+    /// Animator that shakes the game screen when end game event has occured.
+    /// </summary>
     public class BoardShakeAnimator
     {
         private double shakeRadius = 15;
@@ -50,13 +53,16 @@ namespace Tetris.GUI.Animators
             {
                 if (!placedFinished)
                 {
+                    //Lazy way of keeping player off-screen
                     PlayerController.Instance.PlyY = 9999;
+                    //each tick, move blocks on board down.
                     TetrisBoard.Instance.MoveDown();
                     timeLeft = 150;
                 }
                 else
                 {
                     timeLeft = 0;
+                    //Once all blocks are off-screen, call end game event.
                     InGameManager.Instance.GameOver = true;
                     RichPresence.Instance.UpdatePresence();
                     InGameManager.Instance.EndGame();
@@ -68,6 +74,8 @@ namespace Tetris.GUI.Animators
 
         public void StartBatch(SpriteBatch gameBatch)
         {
+            //Don't really know how to feel about this one.
+            //When screen shake is animating, it is required to create a translation matrix to actually draw the effect.
             if (Shaking)
                 gameBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, null,
                     Matrix.CreateTranslation(offset.X, offset.Y, 0));

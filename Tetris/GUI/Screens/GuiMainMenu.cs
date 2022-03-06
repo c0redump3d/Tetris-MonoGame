@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Tetris.Game;
 using Tetris.Game.InGame;
 using Tetris.Game.Managers;
-using Tetris.GUI.Elements;
+using Tetris.GUI.Control.Controls;
 using Tetris.GUI.Screens.ScreenAnimations;
 using Tetris.Multiplayer.Network;
 using Tetris.Sound;
@@ -14,6 +14,7 @@ namespace Tetris.GUI.Screens
 {
     public class GuiMainMenu : GuiScreen
     {
+        //TODO: Move copyright inforation to its own GUI class.
         private readonly string[] CopyrightText =
         {
             "Tetris (c) 1985~2021 Tetris Holding.", "Tetris logos, Tetris theme song and",
@@ -32,24 +33,28 @@ namespace Tetris.GUI.Screens
             NextShape.Instance.ResetNext();
             RichPresence.Instance.SetPresence(0);
             InGameManager.Instance.GameOver = false;
-            Buttons.Add(new Button(0, new Vector2(1000, 170), "Play Game", Globals.Hoog48));
-            Buttons.Add(new Button(1, new Vector2(1000, 270), "Multiplayer", Globals.Hoog48));
-            Buttons.Add(new Button(2, new Vector2(1000, 370), "Settings", Globals.Hoog48));
-            #if !__IOS__
-            Buttons.Add(new Button(3, new Vector2(1000, 470), "Quit Games", Globals.Hoog48));
-            #endif
-            Buttons.Add(new Button(8, new Vector2(1170, 700), "Created by Carson Kelley", Globals.Hoog12, false));
-            Buttons[0].OnClick += s => Gui.SetCurrentScreen(new GuiGamePreferences());
-            Buttons[1].OnClick += s => Gui.SetCurrentScreen(new GuiMultiplayer());
-            Buttons[2].OnClick += SettingsButton;
-            #if !__IOS__
-            Buttons[3].OnClick += s => TetrisGame.Instance.Exit();
-            #endif
-            Buttons[Buttons.Count-1].OnClick += s =>
+            AddControl(new Panel("Test", 50, 50));
+            ((Panel)GetControlFromType(typeof(Panel),0)).AddControl(new Button(Vector2.Zero, "Test Button!", Globals.Hoog12));
+            ((Panel)GetControlFromType(typeof(Panel),0)).AddControl(new Slider(0f, "TestSlider",0,0));
+            ((Panel)GetControlFromType(typeof(Panel),0)).AddControl(new TextBox(0,0, "Test TextBox", 50));
+            AddControl(new Panel("Test2", 350, 50));
+            ((Panel)GetControlFromType(typeof(Panel),1)).AddControl(new Button(Vector2.Zero, "Test Button!", Globals.Hoog12));
+            ((Panel)GetControlFromType(typeof(Panel),1)).AddControl(new Slider(0f, "TestSlider",0,0));
+            ((Panel)GetControlFromType(typeof(Panel),1)).AddControl(new TextBox(0,0, "Test TextBox", 50));
+            AddControl(new Button(new Vector2(1000, 170), "Play Game", Globals.Hoog48));
+            AddControl(new Button(new Vector2(1000, 270), "Multiplayer", Globals.Hoog48));
+            AddControl(new Button(new Vector2(1000, 370), "Settings", Globals.Hoog48));
+            AddControl(new Button(new Vector2(1000, 470), "Quit Games", Globals.Hoog48));
+            AddControl(new Button(new Vector2(1170, 700), "Created by Carson Kelley", Globals.Hoog12, false));
+            ((Button)GetControlFromType(typeof(Button), 0)).OnClick += s => Gui.SetCurrentScreen(new GuiGamePreferences());
+            ((Button)GetControlFromType(typeof(Button), 1)).OnClick += s => Gui.SetCurrentScreen(new GuiMultiplayer());
+            ((Button)GetControlFromType(typeof(Button), 2)).OnClick += SettingsButton;
+            ((Button)GetControlFromType(typeof(Button), 3)).OnClick += s => TetrisGame.Instance.Exit();
+            ((Button)GetControlFromType(typeof(Button), 4)).OnClick += s =>
                 Process.Start(new ProcessStartInfo("https://github.com/StrugglingDoge/Tetris-MonoGame")
                     {UseShellExecute = true});
             if (NetworkManager.Instance.Connected && !NetworkManager.Instance.IsServer())
-                Buttons[0].Enabled = false;
+                ((Button)GetControlFromType(typeof(Button), 0)).Enabled = false;
         }
 
         public override void DrawScreen(SpriteBatch spriteBatch, GameTime gameTime)
@@ -85,9 +90,7 @@ namespace Tetris.GUI.Screens
 
             spriteBatch.Begin();
             spriteBatch.Draw(Globals.Logo, new Vector2(185, 175), Color.White * Opacity);
-
             spriteBatch.DrawString(Globals.Hoog12, $"{Globals.Version}", new Vector2(1, 700), Color.Gray * Opacity);
-            
             spriteBatch.End();
         }
 

@@ -9,6 +9,9 @@ using Tetris.Util;
 
 namespace Tetris.Game.InGame
 {
+    /// <summary>
+    /// Manages the in-game scores like points, level, lines, and any bonuses(multiple line clears, t-spins, etc.)
+    /// </summary>
     public class ScoreHandler
     {
         private int bonus;
@@ -83,7 +86,6 @@ namespace Tetris.Game.InGame
             WasTSpin = false;
 
             RichPresence.Instance.UpdatePresence(); // update discord rpc to reflect new level/score.
-            // GameBoard.Invalidate();
         }
 
         private void LevelUp()

@@ -16,6 +16,8 @@ namespace Tetris.Game
 {
     public class KeyboardInput
     {
+        //TODO: Add gamepad support(directly supported by MonoGame)
+        
         private readonly double[] elapsedTime = new double[3];
         private readonly double[] holdTime = new double[3];
         private KeyboardState keyState;
@@ -23,9 +25,7 @@ namespace Tetris.Game
 
         private KeyboardInput()
         {
-            #if !__IOS__
-                TetrisGame.Instance.Window.TextInput += KeyTyped;
-            #endif
+            TetrisGame.Instance.Window.TextInput += KeyTyped;
         }
 
         public void HandleKeyPress(GameTime gameTime)

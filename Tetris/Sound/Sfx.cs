@@ -76,7 +76,7 @@ namespace Tetris.Sound
                 }
             }
 
-            //SoundEffect.MasterVolume = (float)GameSettings.Instance.GetOptionValue("Volume");
+            SoundEffect.MasterVolume = (float)GameSettings.Instance.GetOptionValue("Volume");
         }
 
         public void PlayPinch()

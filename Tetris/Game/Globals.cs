@@ -20,6 +20,7 @@ namespace Tetris.Game
         public static readonly int TopOut = -80; // if a block reaches this y position, the game will end
         public static Texture2D[] GuiImage = new Texture2D[4];
         public static Texture2D[] GuiSPLayers = new Texture2D[6];
+        public static int Scale = 1;
         public static int ScreenWidth = 1280;
         public static int ScreenHeight = 720;
         public static string Version = "v2.0";
@@ -45,6 +46,10 @@ namespace Tetris.Game
         public static SpriteFont Hoog36;
         public static SpriteFont Hoog48;
 
+        /// <summary>
+        /// Imports/Loads all textures, fonts, and sounds used in the game. 
+        /// </summary>
+        /// <param name="content"></param>
         public void SetUp(ContentManager content)
         {
             for (int i = 0; i < GuiSPLayers.Length; i++)

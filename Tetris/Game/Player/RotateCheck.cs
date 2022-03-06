@@ -6,6 +6,11 @@ using Tetris.Util;
 
 namespace Tetris.Game.Player
 {
+    /// <summary>
+    /// Adds Tetris-like SRS system to game.
+    /// NOTE: Although very accurate to SRS, it is not 100% accurate and does have some issues.
+    /// Specifically I-block rotations are something that are not 100% SRS accurate.
+    /// </summary>
     public class RotateCheck
     {
         private readonly Rectangle[] checkBlock = new Rectangle[4];
@@ -47,6 +52,7 @@ namespace Tetris.Game.Player
 
             DebugConsole.Instance.AddMessage($"WallKick Data: {fromTo}");
 
+            //Find the correct index in the rotation check array to find positions to be checked.
             if (!iBlock)
                 switch (fromTo)
                 {
@@ -163,8 +169,14 @@ namespace Tetris.Game.Player
             }
         }
 
+        /// <summary>
+        /// Very shady way of adding accurate I block rotations.
+        /// I assume this is the reason I-block rotation checks are not 100% accurate.
+        /// </summary>
         private void ICheck(int checkAng, bool clockwise, bool reverse)
         {
+            //Best way I've found to implement semi-proper i-block rotating as implementing it properly would require LOTS of rewriting.
+            
             UpdateRectangles();
             if (reverse)
                 clockwise = !clockwise;

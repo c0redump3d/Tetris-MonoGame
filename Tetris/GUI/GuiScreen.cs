@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Tetris.Game;
 using Tetris.Game.Managers;
-using Tetris.GUI.Elements;
+using Tetris.GUI.Control;
+using Tetris.GUI.Control.Controls;
 using Tetris.GUI.Particle;
 using Tetris.GUI.Particle.Particles;
 using Tetris.GUI.Screens.ScreenAnimations;
@@ -17,9 +19,7 @@ namespace Tetris.GUI
         private float particleWait = 100f;
         protected Color PanelBackgroundCol = new(30, 28, 28);
         protected Color PanelBorderCol = new(97, 21, 179);
-        protected List<Button> Buttons = new();
-        protected List<TextBox> TextBoxes = new();
-        protected List<Slider> Sliders = new();
+        public List<UiControl> Controls = new();
         protected bool ButtonsDrawn = false;
         protected bool Rain = true;
         protected Gui Gui;
@@ -30,11 +30,38 @@ namespace Tetris.GUI
         {
             Gui = Gui.Instance;
             Opacity = 0f;
-            Buttons = new List<Button>();
-            TextBoxes = new List<TextBox>();
-            Sliders = new List<Slider>();
+            Controls = new List<UiControl>();
         }
 
+        public void AddControl(UiControl control)
+        {
+            Controls.Add(control);
+        }
+
+        public int TotalControls()
+        {
+            return Controls.Count;
+        }
+        
+        public UiControl GetControlFromType(Type control, int index)
+        {
+            int typeIndex = 0;
+            foreach(var t in Gui.Instance.CurrentScreen.Controls)
+            {
+                var tempType = t.GetType();
+                if (control == tempType)
+                {
+                    if (typeIndex == index)
+                    {
+                        return t;
+                    }
+                    typeIndex++;
+                }
+            }
+            
+            return null;
+        }
+        
         public virtual void DrawScreen(SpriteBatch spriteBatch, GameTime gameTime)
         {
             ScrollingStars.Instance.DrawStars(spriteBatch);
@@ -43,6 +70,7 @@ namespace Tetris.GUI
             if (Rain)
             {
                 TetrisRain.Instance.DrawRain(spriteBatch, gameTime);
+                //adds an extra opacity layer to give the illusion of depth in the background.
                 spriteBatch.Draw(Globals.TexBox, new Rectangle(0, 0, 1280, 720), Color.Black * 0.15f);
                 spriteBatch.End();
                 ParticleManager.Instance.DrawParticles(spriteBatch);
@@ -57,10 +85,20 @@ namespace Tetris.GUI
                 spriteBatch.DrawString(Globals.Hoog16, ping, new Vector2(1275 - Globals.Hoog16.MeasureString(ping).X, 20), Color.White);
             }
 
+            foreach (var panel in Controls)
+            {
+                if (panel.GetType() == typeof(Panel))
+                {
+                    panel.Draw(spriteBatch);
+                    panel.Draw(spriteBatch,gameTime);
+                }
+            }
+
             //incase i need to draw buttons over something
             if (!ButtonsDrawn)
-                foreach (var but in Buttons)
-                    but.Draw(spriteBatch, Color.White);
+                foreach (var but in Controls)
+                    if(but is Button)
+                        ((Button)but).Draw(spriteBatch, Color.White);
 
             spriteBatch.End();
         }
@@ -86,10 +124,16 @@ namespace Tetris.GUI
                 Opacity += 0.04f;
             else if (Closing && Opacity > 0) Opacity -= 0.04f;
 
-            foreach (var but in Buttons) but.Update();
-            foreach(var tbox in TextBoxes)
-                if (tbox.Focused)
-                    Gui.Instance.CurrentTextBox = tbox;
+            foreach (var control in Controls)
+            {
+                if (control is TextBox)
+                {
+                    var tbox = (TextBox) control;
+                    if (tbox.Focused && Gui.Instance.CurrentTextBox != tbox)
+                        Gui.Instance.CurrentTextBox = tbox;
+                }
+                control.Update(gameTime);
+            }
         }
     }
 }

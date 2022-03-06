@@ -12,6 +12,9 @@ using Tetris.GUI.UiColor;
 
 namespace Tetris.Settings
 {
+    /// <summary>
+    /// This class allows for custom settings to be saved to the settings xml file for the game.
+    /// </summary>
     public class GameSettings
     {
         public List<GameOption<Keys>> KeybindSettings = new();
@@ -19,7 +22,7 @@ namespace Tetris.Settings
         public List<GameOption<float>> SliderSettings = new();
         public List<GameOption<Color>> ColorSettings = new();
         private readonly string appData; // appdata location
-        private string GetSettingsFile() => appData + @"\Tetris\settings.xml";
+        private string GetSettingsFile() => Path.Combine(appData, "Tetris", "settings.xml");
         
         public GameSettings()
         {
@@ -48,12 +51,11 @@ namespace Tetris.Settings
                 ColorSettings.Add(new GameOption<Color>(control.Key, control.Value));
         }
         
+        /// <summary>
+        /// Gives the current OS's application data folder.
+        /// </summary>
         private string GetLocalAppDataFolder()
         {
-            #if __IOS__
-            return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            #endif
-            
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 return Environment.GetEnvironmentVariable("LOCALAPPDATA");
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -62,23 +64,29 @@ namespace Tetris.Settings
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 return Path.Combine(Environment.GetEnvironmentVariable("HOME"), "Library", "Application Support");
             
+            //Game will unfortunately crash if the OS is not detected, but if able to debug will give exception error.
             throw new NotImplementedException("Unknown OS Platform");
         }
         
         private bool DoesFileExist()
         {
-            if (File.Exists(appData + @"\Tetris\settings.xml"))
+            if (File.Exists(GetSettingsFile()))
                 return true;
             
             return false;
         }
 
+        /// <summary>
+        /// Loads the settings file by deserializing the XML settings file.
+        /// </summary>
+        /// <exception cref="Exception">Will be raised if new settings are added and/or have been manipulated in some way.</exception>
         private void Load()
         {
             if (!DoesFileExist())
                 Save();
             try
             {
+                //Kind of gross but first time working with XML.
                 using (var sr = new XmlTextReader(new FileStream(GetSettingsFile(), FileMode.Open)))
                 {
                     List<GameOption<Keys>> check1;
@@ -128,9 +136,9 @@ namespace Tetris.Settings
         
         public void Save()
         {
-            if (!Directory.Exists(appData + @"\Tetris"))
-                Directory.CreateDirectory(appData + @"\Tetris");
-            // Overrides the file if it alreadt exists
+            if (!Directory.Exists(Path.Combine(appData, "Tetris")))
+                Directory.CreateDirectory(Path.Combine(appData, "Tetris"));
+            // Overrides the file if it already exists
             using (var sw = new StreamWriter(new FileStream(GetSettingsFile(), FileMode.Create)))
             {
                 Type[] extraTypes = new Type[4] { typeof(List<GameOption<Keys>>), typeof(List<GameOption<bool>>), typeof(List<GameOption<float>>), typeof(List<GameOption<Color>>) };
@@ -142,11 +150,12 @@ namespace Tetris.Settings
                 list.Add(ColorSettings);
                 serializer.Serialize(sw, list);
             }
-            DebugConsole.Instance.AddMessage("Successfully saved settings file.");
+            DebugConsole.Instance.AddMessage($"Successfully saved settings file: {GetSettingsFile()}");
         }
         
         public void ChangeKeybind(string name, Keys value)
         {
+            //Loop through our key options and set to new value
             foreach (GameOption<Keys> option in KeybindSettings)
             {
                 if (option.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
@@ -189,6 +198,11 @@ namespace Tetris.Settings
             }
         }
 
+        /// <summary>
+        /// Returns the current value of the game setting (EX: "RotateLeft" could return Key "X")
+        /// </summary>
+        /// <param name="name">Setting Name</param>
+        /// <returns>Object value</returns>
         public object GetOptionValue(string name)
         {
             foreach (GameOption<Keys> option in KeybindSettings)

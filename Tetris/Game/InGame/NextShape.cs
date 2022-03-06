@@ -9,6 +9,8 @@ namespace Tetris.Game.InGame
 {
     public class NextShape
     {
+        //TODO: Again, this class needs to be refactored as it has not been really touched since the move to MonoGame.
+        
         private readonly List<int> defaultOrder = new() {1, 2, 3, 4, 5, 6, 7};
         private readonly Texture2D[] nextTetImage = new Texture2D[5];
         private readonly Rectangle[] nFive = new Rectangle[4];
@@ -65,6 +67,8 @@ namespace Tetris.Game.InGame
             var countX = count != 0 ? 7 : 0;
             var countY = count != 0 ? getNextY(count) : 0;
 
+            //REFACTORRRRRRRRR
+            
             if (shape == 1)
             {
                 nX = 34 + countX;

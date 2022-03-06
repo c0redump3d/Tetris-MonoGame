@@ -8,9 +8,12 @@ namespace Tetris.Multiplayer
     
     /// <summary>
     /// This class is essentially a very basic version of PlayerController.cs
+    /// Better to control these objects/values locally instead of having to send more data over network.
     /// </summary>
     public class PlayerMP
     {
+        //TODO: Needs to be updated to support the new Color manager.
+        
         public int PosX, PosY;
         private int rotationAngle;
         private int currentShape;

@@ -10,6 +10,7 @@ namespace Tetris.Game.InGame
 {
     public class HoldShape
     {
+        //TODO: This class could really benefit from a refactor(Really hasn't been touched since WinForm version)
         private bool disabled;
         private bool hasUsed;
 
@@ -43,6 +44,10 @@ namespace Tetris.Game.InGame
             }
         }
 
+        /// <summary>
+        /// Sets the the hold shapes positions to the passed shape variable.
+        /// </summary>
+        /// <param name="shape">Previous player-controlled block</param>
         public void SetHoldShape(int shape)
         {
             if (hasUsed || disabled)
@@ -63,6 +68,8 @@ namespace Tetris.Game.InGame
                 Sfx.Instance.PlaySoundEffect("hold");
             }
 
+            //TODO: There is surely much better ways of implementing this. Rewrite.
+            
             if (shape == 1)
             {
                 hX = 34;
@@ -152,28 +159,15 @@ namespace Tetris.Game.InGame
             if (tetImage == null)
                 return;
 
-            if (hasUsed)
-            {
-                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp,
-                    DepthStencilState.Default, RasterizerState.CullCounterClockwise, null,
-                    Matrix.CreateTranslation(new Vector3(NetworkManager.Instance.Connected ? 110 : 310, 60, 0)));
-                spriteBatch.Draw(Globals.BlockTexture[7], hOne, Color.White);
-                spriteBatch.Draw(Globals.BlockTexture[7], hTwo, Color.White);
-                spriteBatch.Draw(Globals.BlockTexture[7], hThree, Color.White);
-                spriteBatch.Draw(Globals.BlockTexture[7], hFour, Color.White);
-                spriteBatch.End();
-            }
-            else
-            {
-                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp,
-                    DepthStencilState.Default, RasterizerState.CullCounterClockwise, null,
-                    Matrix.CreateTranslation(new Vector3(NetworkManager.Instance.Connected ? 110 : 310, 60, 0)));
-                spriteBatch.Draw(tetImage, hOne, Color.White);
-                spriteBatch.Draw(tetImage, hTwo, Color.White);
-                spriteBatch.Draw(tetImage, hThree, Color.White);
-                spriteBatch.Draw(tetImage, hFour, Color.White);
-                spriteBatch.End();
-            }
+            Texture2D blockTex = hasUsed ? Globals.BlockTexture[7] : tetImage;
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp,
+                DepthStencilState.Default, RasterizerState.CullCounterClockwise, null,
+                Matrix.CreateTranslation(new Vector3(NetworkManager.Instance.Connected ? 110 : 310, 60, 0)));
+            spriteBatch.Draw(blockTex, hOne, Color.White);
+            spriteBatch.Draw(blockTex, hTwo, Color.White);
+            spriteBatch.Draw(blockTex, hThree, Color.White);
+            spriteBatch.Draw(blockTex, hFour, Color.White);
+            spriteBatch.End();
         }
 
         public void DisallowSwap()

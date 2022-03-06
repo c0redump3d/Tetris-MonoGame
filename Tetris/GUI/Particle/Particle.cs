@@ -4,6 +4,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Tetris.GUI.Particle
 {
+    /// <summary>
+    /// A boiler-plate class to make adding new particles a very easy process.
+    /// </summary>
     public class Particle
     {
         protected readonly Random random = new();
@@ -20,6 +23,7 @@ namespace Tetris.GUI.Particle
         protected float Size { get; set; }
         protected float Rotation { get; set; }
         protected Color ParticleColor { get; set; }
+        //If the particle lifespan is under 0, or size is below 0, the particle is considered dead.
         public bool Alive => LifeSpan > 0f && Size > 0f;
 
         public virtual void Update(GameTime gameTime)

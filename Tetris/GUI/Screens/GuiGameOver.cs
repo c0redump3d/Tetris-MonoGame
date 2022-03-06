@@ -6,7 +6,7 @@ using Tetris.Game.Managers;
 using Tetris.Game.Mode;
 using Tetris.Game.Mode.Modes;
 using Tetris.Game.Player;
-using Tetris.GUI.Elements;
+using Tetris.GUI.Control.Controls;
 using Tetris.GUI.Screens.ScreenAnimations;
 using Tetris.Sound;
 using Tetris.Util;
@@ -20,8 +20,8 @@ namespace Tetris.GUI.Screens
             base.SetUp();
             Sfx.Instance.PlayBackground();
             TetrisRain.Instance.FadeTime = 0f;
-            Buttons.Add(new Button(1, new Vector2(640, 550), "Main Menu", Globals.Hoog48));
-            Buttons[0].OnClick += o => Gui.SetCurrentScreen(new GuiMainMenu());
+            AddControl(new Button(new Vector2(640, 550), "Main Menu", Globals.Hoog48));
+            ((Button)GetControlFromType(typeof(Button),0)).OnClick += o => Gui.SetCurrentScreen(new GuiMainMenu());
         }
 
         public override void Update(GameTime gameTime)

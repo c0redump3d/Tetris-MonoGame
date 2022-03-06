@@ -16,6 +16,9 @@ using Tetris.Util;
 
 namespace Tetris.Game.Managers
 {
+    /// <summary>
+    /// Manages all in-game events(NOT menu-related items!)
+    /// </summary>
     public class InGameManager
     {
         
@@ -34,6 +37,9 @@ namespace Tetris.Game.Managers
         private bool Started { get; set; }
         public bool IsCountdown { get; set; }
 
+        /// <summary>
+        /// Starts the game.
+        /// </summary>
         public void StartGame()
         {
             if (Started)
@@ -75,6 +81,9 @@ namespace Tetris.Game.Managers
             RichPresence.Instance.UpdatePresence();
         }
 
+        /// <summary>
+        /// Starts the in-game countdown, and once completed will start the actual game.
+        /// </summary>
         public void StartCountdown()
         {
             if (Started)
@@ -85,8 +94,8 @@ namespace Tetris.Game.Managers
             }
 
             RichPresence.Instance.SetPresence(1);
-            ScoreHandler.Instance.Reset();
             //reset stats
+            ScoreHandler.Instance.Reset();
             var addZero = ScoreHandler.Instance.Level < 10 ? "0" : "";
             ScoreHandler.Instance.ScoreFont = Globals.Hoog28;
             ScoreHandler.Instance.LevelText = $@"{addZero}{ScoreHandler.Instance.Level}";
@@ -124,7 +133,7 @@ namespace Tetris.Game.Managers
 
         public void UpdateGame(GameTime gameTime)
         {
-            if (InGameManager.Instance.Stopped && InGameManager.Instance.Paused)
+            if (Stopped && Paused)
                 return;
             MessageAnimator.Instance.Update(gameTime);
             PlayerController.Instance.Gravity(gameTime);
@@ -135,6 +144,9 @@ namespace Tetris.Game.Managers
             UpdatePinch();
         }
 
+        /// <summary>
+        /// Draws the pinch overlay on screen when any placed blocks have reached a Y level lower than 128.
+        /// </summary>
         private void DrawPinch(SpriteBatch spriteBatch)
         {
             if (showPinch)
@@ -149,6 +161,9 @@ namespace Tetris.Game.Managers
             }
         }
 
+        /// <summary>
+        /// Checks the board for any placed blocks lower than Y level 128.
+        /// </summary>
         private void UpdatePinch()
         {
             var found = false;
@@ -172,6 +187,9 @@ namespace Tetris.Game.Managers
 
         }
         
+        /// <summary>
+        /// Returns true if the countdown is currently being displayed.
+        /// </summary>
         public bool GetCountdown()
         {
             return IsCountdown;
@@ -182,6 +200,9 @@ namespace Tetris.Game.Managers
             IsCountdown = false;
         }
 
+        /// <summary>
+        /// Stops in-game updates and sets screen to GameOver.
+        /// </summary>
         public void EndGame()
         {
             if (!GameOver)

@@ -5,6 +5,11 @@ using Tetris.Game.Managers;
 
 namespace Tetris.Game.Player
 {
+    /// <summary>
+    /// Creates a clone player that has insanely fast gravity time to show where the block would fall to in its current position.
+    /// Fun fact:
+    /// This was previously not able to be done in WinForms since the application could not update its position fast enough.
+    /// </summary>
     public class Prediction
     {
         #region Variables

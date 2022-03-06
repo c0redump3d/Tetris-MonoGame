@@ -1,4 +1,4 @@
-﻿namespace Tetris.GUI.Elements
+﻿namespace Tetris.GUI.Control.Controls
 {
     public class MessageLine
     {

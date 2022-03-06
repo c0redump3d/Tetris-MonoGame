@@ -32,11 +32,7 @@ namespace Tetris.Game.Player
         public void MoveRight()
         {
             UpdateLoc();
-            if (TetrisBoard.Instance.WouldCollideLR(new[] {bOne, bTwo, bThree, bFour}, false)
-                || bOne.X >= 288
-                || bTwo.X >= 288
-                || bThree.X >= 288
-                || bFour.X >= 288)
+            if (TetrisBoard.Instance.WouldCollideLR(new[] {bOne, bTwo, bThree, bFour}, false))
                 return;
             plyX += 32;
             Sfx.Instance.PlaySoundEffect("move");
@@ -51,11 +47,7 @@ namespace Tetris.Game.Player
         public void MoveLeft()
         {
             UpdateLoc();
-            if (TetrisBoard.Instance.WouldCollideLR(new[] {bOne, bTwo, bThree, bFour}, true)
-                || bOne.X <= 0
-                || bTwo.X <= 0
-                || bThree.X <= 0
-                || bFour.X <= 0)
+            if (TetrisBoard.Instance.WouldCollideLR(new[] {bOne, bTwo, bThree, bFour}, true))
                 return;
 
             plyX -= 32;

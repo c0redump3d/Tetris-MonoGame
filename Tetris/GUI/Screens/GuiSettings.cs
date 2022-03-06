@@ -4,8 +4,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Tetris.Game;
+using Tetris.GUI.Control.Controls;
 using Tetris.GUI.DebugMenu;
-using Tetris.GUI.Elements;
 using Tetris.Settings;
 using Tetris.Sound;
 using Tetris.Util;
@@ -24,31 +24,31 @@ namespace Tetris.GUI.Screens
         {
             base.SetUp();
             UpdateText();
-            Buttons.Add(new Button(0, new Vector2(640, 130), bindText[0], Globals.Hoog24));
-            Buttons.Add(new Button(1, new Vector2(640, 180), bindText[1], Globals.Hoog24));
-            Buttons.Add(new Button(2, new Vector2(640, 230), bindText[2], Globals.Hoog24));
-            Buttons.Add(new Button(3, new Vector2(640, 280), bindText[3], Globals.Hoog24));
-            Buttons.Add(new Button(4, new Vector2(640, 330), bindText[4], Globals.Hoog24));
-            Buttons.Add(new Button(5, new Vector2(640, 380), bindText[5], Globals.Hoog24));
-            Buttons.Add(new Button(6, new Vector2(640, 430), bindText[6], Globals.Hoog24));
+            AddControl(new Button(new Vector2(640, 130), bindText[0], Globals.Hoog24));
+            AddControl(new Button(new Vector2(640, 180), bindText[1], Globals.Hoog24));
+            AddControl(new Button(new Vector2(640, 230), bindText[2], Globals.Hoog24));
+            AddControl(new Button(new Vector2(640, 280), bindText[3], Globals.Hoog24));
+            AddControl(new Button(new Vector2(640, 330), bindText[4], Globals.Hoog24));
+            AddControl(new Button(new Vector2(640, 380), bindText[5], Globals.Hoog24));
+            AddControl(new Button(new Vector2(640, 430), bindText[6], Globals.Hoog24));
             for (var i = 0; i < 7; i++)
-                Buttons[i].OnClick += BindClick;
+                ((Button)GetControlFromType(typeof(Button), i)).OnClick += BindClick;
             musicSetting = (bool)GameSettings.Instance.GetOptionValue("Music") ? "On" : "Off";
-            Buttons.Add(new Button(7, new Vector2(280, 130), $"Music: {musicSetting}", Globals.Hoog24));
-            Buttons[7].OnClick += AudioClick;
-            Buttons.Add(new Button(10, new Vector2(640, 610), "Back", Globals.Hoog48));
-            Buttons[8].OnClick += o => Gui.SetCurrentScreen(new GuiMainMenu());
+            AddControl(new Button(new Vector2(280, 130), $"Music: {musicSetting}", Globals.Hoog24));
+            ((Button)GetControlFromType(typeof(Button), 7)).OnClick += AudioClick;
+            AddControl(new Button(new Vector2(640, 610), "Back", Globals.Hoog48));
+            ((Button)GetControlFromType(typeof(Button), 8)).OnClick += o => Gui.SetCurrentScreen(new GuiMainMenu());
             fullscreenSetting = (bool)GameSettings.Instance.GetOptionValue("Fullscreen") ? "On" : "Off";
-            Buttons.Add(new Button(11, new Vector2(1000, 130), $"Fullscreen: {fullscreenSetting}", Globals.Hoog24));
-            Buttons[9].OnClick += o =>
+            AddControl(new Button(new Vector2(1000, 130), $"Fullscreen: {fullscreenSetting}", Globals.Hoog24));
+            ((Button)GetControlFromType(typeof(Button), 9)).OnClick += o =>
             {
                 GameSettings.Instance
                     .ChangeToggle("Fullscreen", !(bool) GameSettings.Instance.GetOptionValue("Fullscreen"));
                 fullscreenSetting = (bool)GameSettings.Instance.GetOptionValue("Fullscreen") ? "On" : "Off";
                 GameSettings.Instance.Save();
             };//640, 510
-            Buttons.Add(new Button(12, new Vector2(1125, 425), "Reset", Globals.Hoog24));
-            Buttons[10].OnClick += o =>
+            AddControl(new Button(new Vector2(1125, 425), "Reset", Globals.Hoog24));
+            ((Button)GetControlFromType(typeof(Button), 10)).OnClick += o =>
             {
                 if(!(bool)GameSettings.Instance.GetOptionValue("Music"))
                     Sfx.Instance.PlayBackground();
@@ -56,16 +56,16 @@ namespace Tetris.GUI.Screens
                 UpdateText();
                 for(int i = 0; i < 6; i++)
                 {
-                    Buttons[i].Text = bindText[Buttons[i].Id];
+                    ((Button)GetControlFromType(typeof(Button), i)).Text = bindText[((Button)GetControlFromType(typeof(Button), i)).ID];
                 }
                 Sfx.Instance.SetVolume();
                 musicSetting = (bool)GameSettings.Instance.GetOptionValue("Music") ? "On" : "Off";
-                Buttons[7].Text = $"Music: {musicSetting}";
+                ((Button)GetControlFromType(typeof(Button), 7)).Text = $"Music: {musicSetting}";
             };
-            Buttons.Add(new Button(13, new Vector2(640, 510),"Color Editor", Globals.Hoog48));
-            Buttons[11].OnClick += o => Gui.Instance.SetCurrentScreen(new GuiEditColor()); 
-            Sliders.Add(new Slider((float)GameSettings.Instance.GetOptionValue("Volume"), "Volume", 182,180));
-            Sliders[0].OnRelease += SetVolume;
+            AddControl(new Button(new Vector2(640, 510),"Color Editor", Globals.Hoog48));
+            ((Button)GetControlFromType(typeof(Button), 11)).OnClick += o => Gui.Instance.SetCurrentScreen(new GuiEditColor()); 
+            AddControl(new Slider((float)GameSettings.Instance.GetOptionValue("Volume"), "Volume", 182,180));
+            ((Slider)GetControlFromType(typeof(Slider), 0)).OnRelease += SetVolume;
             ButtonsDrawn = true;
         }
 
@@ -92,7 +92,7 @@ namespace Tetris.GUI.Screens
         
         private void SetVolume()
         {
-            GameSettings.Instance.ChangeSlider("Volume", (int)(Sliders[0].GetValue()*100f)/100f);
+            GameSettings.Instance.ChangeSlider("Volume", (int)(((Slider)GetControlFromType(typeof(Slider), 0)).GetValue()*100f)/100f);
             GameSettings.Instance.Save();
             Sfx.Instance.SetVolume();
         }
@@ -102,7 +102,7 @@ namespace Tetris.GUI.Screens
             GameSettings.Instance.ChangeToggle("Music", !(bool) GameSettings.Instance.GetOptionValue("Music"));
             musicSetting = (bool) GameSettings.Instance.GetOptionValue("Music") ? "On" : "Off";
             Sfx.Instance.PlayBackground();
-            Buttons[7].Text = $"Music: {musicSetting}";
+            ((Button)GetControlFromType(typeof(Button), 7)).Text = $"Music: {musicSetting}";
             GameSettings.Instance.Save();
         }
 
@@ -112,7 +112,7 @@ namespace Tetris.GUI.Screens
 
             if (CurrentlyFocused) // allows user to cancel bind
             {
-                but.Text = bindText[but.Id];
+                but.Text = bindText[but.ID];
                 activeButton = -1;
                 CurrentlyFocused = false;
                 EnableAllButtons(); // reenable other buttons
@@ -120,7 +120,7 @@ namespace Tetris.GUI.Screens
             }
 
             CurrentlyFocused = true;
-            activeButton = but.Id;
+            activeButton = but.ID;
             but.Text = $"{but.Text.Split(':')[0]}: _";
             DisableAllButtons(but);
         }
@@ -130,12 +130,15 @@ namespace Tetris.GUI.Screens
             if (activeButton == -1)
                 return;
 
-            foreach (var but in Buttons)
-                if (but.Id == activeButton)
+            foreach (var but in Controls)
+            {
+                if (but.GetType() != typeof(Button))
+                    continue;
+                if (but.ID == activeButton)
                 {
                     if (IsButtonBound(key)) // if the button is already bound we cancel
                     {
-                        but.Text = bindText[but.Id];
+                        but.Text = bindText[but.ID];
                         activeButton = -1;
                         CurrentlyFocused = false;
                         EnableAllButtons();
@@ -151,6 +154,7 @@ namespace Tetris.GUI.Screens
                         .ChangeKeybind($"{bindText[activeButton].Split(':')[0].Replace(" ", "")}", key);
                     DebugConsole.Instance.AddMessage("2");
                 }
+            }
 
             activeButton = -1;
             EnableAllButtons();
@@ -160,8 +164,10 @@ namespace Tetris.GUI.Screens
 
         private void DisableAllButtons(Button button)
         {
-            foreach (var but in Buttons)
+            foreach (var but in Controls)
             {
+                if (but.GetType() != typeof(Button))
+                    continue;
                 if (but == button) continue;
 
                 but.Enabled = false;
@@ -170,8 +176,10 @@ namespace Tetris.GUI.Screens
 
         private void EnableAllButtons()
         {
-            foreach (var but in Buttons)
+            foreach (var but in Controls)
             {
+                if (but.GetType() != typeof(Button))
+                    continue;
                 if (but.Enabled) continue;
 
                 but.Enabled = true;
@@ -190,16 +198,20 @@ namespace Tetris.GUI.Screens
             spriteBatch.DrawCenteredString(Globals.Hoog24, "Keybinds", new Vector2(640, 100), Color.White);
             spriteBatch.DrawCenteredString(Globals.Hoog24, "Sound", new Vector2(280, 100), Color.White);
             spriteBatch.DrawCenteredString(Globals.Hoog24, "Video", new Vector2(1000, 100), Color.White);
-            foreach(var slider in Sliders) slider.Draw(spriteBatch);
-            foreach (var but in Buttons) but.Draw(spriteBatch, Color.White);
+            foreach (var con in Controls)
+            {
+                if (con.GetType() == typeof(Slider))
+                    con.Draw(spriteBatch);
+                if (con.GetType() == typeof(Button))
+                    ((Button)con).Draw(spriteBatch, Color.White);
+            }
             spriteBatch.End();
         }
 
         public override void Update(GameTime gameTime)
         {
             fullscreenSetting = (bool)GameSettings.Instance.GetOptionValue("Fullscreen") ? "On" : "Off";
-            Buttons[9].Text = $"Fullscreen: {fullscreenSetting}";
-            foreach(var slider in Sliders) slider.Update(gameTime);
+            ((Button)GetControlFromType(typeof(Button), 9)).Text = $"Fullscreen: {fullscreenSetting}";
             base.Update(gameTime);
         }
     }

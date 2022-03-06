@@ -7,6 +7,9 @@ using Tetris.Game.Player;
 
 namespace Tetris.GUI.DebugMenu
 {
+    /// <summary>
+    /// An extremely basic menu that allows for enabling/disabling of certain debugging features in-game.
+    /// </summary>
     public class DebugMenu
     {
         
@@ -86,6 +89,7 @@ namespace Tetris.GUI.DebugMenu
                     lastY = (i + 1) * 12;
                 }
 
+                //Not a super great way of getting a super accurate value of frames, but works well enough for its purpose.
                 var extraInfo =
                     $"{Globals.Version} fps: {1 / gameTime.ElapsedGameTime.TotalSeconds:n2} os: {Globals.CurrentOS}";
 
@@ -101,10 +105,14 @@ namespace Tetris.GUI.DebugMenu
             debugEnabled.Add(false);
         }
         
+        /// <summary>
+        /// Draws helpful player specific debug information to screen.
+        /// </summary>
         public void DrawPlayerDebug(SpriteBatch spriteBatch)
         {
             var ply = PlayerController.Instance;
             
+            //Draws blocks name on top of block(ex: ply[1] would draw text 'R1' at its current position)
             if (IsOptionEnabled(1))
             {
                 spriteBatch.DrawString(Globals.ConsoleFont, "ply", new Vector2(ply.PlayerBlocks[0].X + 3, ply.PlayerBlocks[0].Y + 5),
@@ -121,6 +129,7 @@ namespace Tetris.GUI.DebugMenu
             {
                 Rectangle[] positions = {ply.PlayerBlocks[0], ply.PlayerBlocks[1], ply.PlayerBlocks[2], ply.PlayerBlocks[3]};
                 var lastY = 0;
+                //Player block offset positions from main block(ply[0]).
                 for (var i = 0; i < positions.Length; i++)
                 {
                     var blPos = "";
@@ -143,6 +152,7 @@ namespace Tetris.GUI.DebugMenu
                     lastY = i + 1;
                 }
 
+                //Draws the current shape and angle of the block.
                 spriteBatch.DrawString(Globals.ConsoleFont,
                     $"shape/ang: {Rotate.Instance.GetCurShape()},{Rotate.Instance.GetCurAngle()}",
                     new Vector2(0, lastY * 14), Color.White * 0.5F);
@@ -153,6 +163,7 @@ namespace Tetris.GUI.DebugMenu
                     Color.White * 0.5F);
             }
 
+            //(Rotation blocks)
             if (IsOptionEnabled(3))
                 for (var i = 0; i < 4; i++)
                     spriteBatch.Draw(Globals.BlockTexture[Rotate.Instance.GetCurShape()-1],

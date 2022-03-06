@@ -10,6 +10,7 @@ namespace Tetris.GUI.Animators
 {
     public class MessageAnimator
     {
+        //TODO: this is very broken rn lol.
         private List<Message> animList;
         
         private MessageAnimator()

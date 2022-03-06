@@ -1,19 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <PublishReadyToRun>false</PublishReadyToRun>
     <TieredCompilation>false</TieredCompilation>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Content\gui\Icon.ico</ApplicationIcon>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <LangVersion>9</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <MonoGameContentReference Include="Content\Content.mgcb" />
@@ -38,5 +32,8 @@
     <EmbeddedResource Include="Icon.bmp" />
     <None Remove="Icon.ico" />
     <EmbeddedResource Include="Icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="GUI\Panel" />
   </ItemGroup>
 </Project>

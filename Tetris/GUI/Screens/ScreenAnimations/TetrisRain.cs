@@ -8,11 +8,17 @@ using Tetris.Util;
 
 namespace Tetris.GUI.Screens.ScreenAnimations
 {
+    /// <summary>
+    /// Creates a super cool raining effect of falling tetris blocks.
+    /// Uses PlayerController variables to find and set the random block.
+    /// </summary>
     public class TetrisRain
     {
         private readonly int[] rainBlockImage = new int[30];
         public float FadeTime;
-        private int gravity = 500;
+        private int gravity = 500; // blocks are updated every 500ms
+        
+        //Really would've rather made this more expandable by not having a hard limit on blocks but whatever.
         private int[,] rainBlockPos;
         private Rectangle[,] rainBlocks;
 
@@ -32,8 +38,6 @@ namespace Tetris.GUI.Screens.ScreenAnimations
         /// <summary>
         ///     Chooses a random shape and rotation angle for the given block and resets its position.
         /// </summary>
-        /// <param name="rect"></param>
-        /// <param name="arr"></param>
         private void ChooseBlock(Rectangle[] rect, int arr)
         {
             var shape = rand.Next(0, 7);
@@ -55,7 +59,7 @@ namespace Tetris.GUI.Screens.ScreenAnimations
             for (var l = 0; l < 40; l++) // checks each x position
             {
                 UpdateRectangles(rect, arr);
-                //move any blocks that are off-screen
+                //move any blocks that are off-screen back on-screen
                 for (var i = 0; i < rect.Length; i++)
                 {
                     if (rect[i].X < 0) rainBlockPos[arr, 0] += 32;
@@ -65,6 +69,7 @@ namespace Tetris.GUI.Screens.ScreenAnimations
             }
 
             rainBlockPos[arr, 1] = FindY(rainBlockPos[arr, 0], Globals.TopOut - 80, arr); // set to rand x
+            //update the rectangles positions to reflect changes.
             UpdateRectangles(rect, arr);
 
             rainBlockImage[arr] = shape;
@@ -74,6 +79,9 @@ namespace Tetris.GUI.Screens.ScreenAnimations
                 rainBlocks[arr, i] = rect[i];
         }
 
+        /// <summary>
+        /// Returns true/false whether the checked block collides with any other blocks being drawn.
+        /// </summary>
         private bool DoesBlockExistHere(int x, int y, int arr)
         {
             //pretty self-explanatory, checks to see if any rain blocks collide with the checked block
@@ -86,7 +94,7 @@ namespace Tetris.GUI.Screens.ScreenAnimations
                 rect[3] = new Rectangle(x + rainBlockPos[arr, 7], y - rainBlockPos[arr, 6], 32, 32);
                 for (var i = 0; i < rainBlocks.GetLength(0); i++)
                 for (var f = 0; f < rainBlocks.GetLength(1); f++)
-                    if (rainBlocks[i, f].Intersects(rect[g]))
+                    if (rainBlocks[i, f].Intersects(rect[g])) // block is colliding
                         return true;
             }
 
