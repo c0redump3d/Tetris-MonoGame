@@ -1,37 +1,27 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Tetris.Other;
+﻿using LiteNetLib;
+using LiteNetLib.Utils;
+using Tetris.Game;
+using Tetris.Game.Events;
+using Tetris.Game.InGame;
 
-namespace Tetris.Multiplayer.Network.Packets
+namespace Tetris.Multiplayer.Network.Packets;
+
+public class EndGamePacket : Packet
 {
-    public class EndGamePacket : Packet
+    public EndGamePacket(int id) : base(id)
     {
+    }
 
-        public EndGamePacket(string name) : base(name) {}
+    protected override void SendPacket()
+    {
+        dataWriter = new NetDataWriter();
+        dataWriter.Put(PacketID);
+        base.SendPacket();
+    }
 
-        protected override void RunPacket()
-        {
-            if (Instance.GetGame().Sender)
-                return;
-            
-            Instance.GetPlayer().PlacedRect.Add(new Rectangle(999, Globals.TopOut, 32, 32), Globals.BlockTexture[7]);
-            Instance.GetGame().Winner = true;
-            Instance.GetMultiplayerHandler().PlacedRect = new Rectangle[0];
-            Instance.GetMultiplayerHandler().StoredImage = new Texture2D[0];
-            base.RunPacket();
-        }
-
-        protected override void SendPacket()
-        {
-            if (!InMultiplayer())
-                return;
-
-            Instance.GetMultiplayerHandler().PlacedRect = new Rectangle[0];
-            Instance.GetMultiplayerHandler().StoredImage = new Texture2D[0];
-            Instance.GetGame().Sender = true;
-            //Packet parent class will take care of the rest.
-            base.SendPacket();
-        }
-
+    protected override void RunPacket(NetPacketReader packetReader)
+    {
+        EventManager.Instance.GetEvent("playerdeath").Call();
+        base.RunPacket(packetReader);
     }
 }

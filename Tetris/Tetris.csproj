@@ -1,29 +1,73 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
-    <PublishReadyToRun>false</PublishReadyToRun>
-    <TieredCompilation>false</TieredCompilation>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>Content\gui\Icon.ico</ApplicationIcon>
-  </PropertyGroup>
-  <ItemGroup>
-    <MonoGameContentReference Include="Content\Content.mgcb" />
-  </ItemGroup>
-  <ItemGroup>
-    <TrimmerRootAssembly Include="Microsoft.Xna.Framework.Content.ContentTypeReader" Visible="false" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="DiscordRichPresence" Version="1.0.175" />
-    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641" />
-    <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.0.1641" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Icon.bmp" />
-    <EmbeddedResource Include="Icon.bmp" />
-    <None Remove="Icon.ico" />
-    <EmbeddedResource Include="Icon.ico" />
-  </ItemGroup>
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <PublishReadyToRun>false</PublishReadyToRun>
+        <TieredCompilation>false</TieredCompilation>
+        <TargetFramework>net6.0</TargetFramework>
+        <Configurations>Debug;Release;ARM</Configurations>
+        <Platforms>AnyCPU;arm64</Platforms>
+    </PropertyGroup>
+    <PropertyGroup>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <ApplicationIcon>Content\gui\Icon.ico</ApplicationIcon>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <LangVersion>10</LangVersion>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <LangVersion>10</LangVersion>
+    </PropertyGroup>
+    <ItemGroup>
+        <MonoGameContentReference Include="Content\Content.mgcb" />
+    </ItemGroup>
+    <ItemGroup>
+        <TrimmerRootAssembly Include="Microsoft.Xna.Framework.Content.ContentTypeReader" Visible="false" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="DiscordRichPresence" Version="1.0.175" />
+        <PackageReference Include="LiteNetLib" Version="0.9.5.2" />
+        <PackageReference Include="MonoGame.Extended" Version="3.8.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Remove="Icon.bmp" />
+        <EmbeddedResource Include="Icon.bmp" />
+        <None Remove="Icon.ico" />
+        <EmbeddedResource Include="Icon.ico" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="$(NugetPackageRoot)\monogame.framework.desktopgl\3.8.0.1641\runtimes\osx\native\libopenal.1.dylib">
+            <Link>libopenal.1.dylib</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="$(NugetPackageRoot)\monogame.framework.desktopgl\3.8.0.1641\runtimes\osx\native\libSDL2-2.0.0.dylib">
+            <Link>libSDL2-2.0.0.dylib</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="$(NugetPackageRoot)\monogame.framework.desktopgl\3.8.0.1641\runtimes\win-arm64\native\SDL2.dll">
+            <Link>SDL2.dll</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="$(NugetPackageRoot)\monogame.framework.desktopgl\3.8.0.1641\runtimes\win-arm64\native\soft_oal.dll">
+            <Link>soft_oal.dll</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="Content\bin\DesktopGL\Content\**" Link="Content\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="MonoGame.Content.Builder.Task, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\..\..\..\MonoGame Arm64\Arm64\MonoGame.Content.Builder.Task\net6.0\osx-arm64\MonoGame.Content.Builder.Task.dll</HintPath>
+        </Reference>
+        <Reference Include="MonoGame.Framework, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\..\..\..\MonoGame Arm64\Arm64\MonoGame.Framework\DesktopGL\net6.0\MonoGame.Framework.dll</HintPath>
+        </Reference>
+        <Reference Include="MonoGame.Framework.Content.Pipeline, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>..\..\..\..\MonoGame Arm64\Arm64\MonoGame.Framework.Content.Pipeline\MonoGame.Framework.Content.Pipeline.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 </Project>

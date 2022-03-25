@@ -1,29 +1,33 @@
-﻿using Microsoft.Xna.Framework;
-using Tetris.Other;
+﻿using LiteNetLib;
+using LiteNetLib.Utils;
+using Tetris.Game.InGame;
+using Tetris.Game.Mode;
+using Tetris.GUI;
+using Tetris.GUI.Screens;
 
-namespace Tetris.Multiplayer.Network.Packets
+namespace Tetris.Multiplayer.Network.Packets;
+
+public class StartGamePacket : Packet
 {
-    class StartGamePacket : Packet
+    public StartGamePacket(int id) : base(id)
     {
-        //Server only packet
-        public StartGamePacket(string name) : base(name) {}
+    }
 
-        protected override void RunPacket()
-        {
-            if (IsServer())
-                return;
+    protected override void SendPacket()
+    {
+        dataWriter = new NetDataWriter();
+        dataWriter.Put(PacketID);
+        dataWriter.Put(ScoreHandler.Instance.SelectedLevel);
+        dataWriter.Put(ModeManager.Instance.GetCurrentMode().Name);
+        base.SendPacket();
+    }
 
-            Instance.GetSound().PlayBackground();
-            Instance.GetGame().StartCountdown();
-            Instance.GetGame().CurrentMode = 0;
-            Instance.GetPlayer().PlyY = 0;
-            Instance.GetMultiplayerHandler().PlacedRect = new Rectangle[0];
-            base.RunPacket();
-        }
-
-        protected override void SendPacket()
-        {
-            base.SendPacket();
-        }
+    protected override void RunPacket(NetPacketReader packetReader)
+    {
+        PlayerMP.Instance.MultiplayerBoard = new int[22, 10];
+        ScoreHandler.Instance.SelectedLevel = packetReader.GetInt();
+        ModeManager.Instance.SetCurrentMode(packetReader.GetString());
+        Gui.Instance.SetCurrentScreen(new GuiInGame());
+        base.RunPacket(packetReader);
     }
 }
